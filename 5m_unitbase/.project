@@ -32,6 +32,11 @@
 	</natures>
 	<linkedResources>
 		<link>
+			<name>CAN_library</name>
+			<type>2</type>
+			<location>C:/user_file/STM32CubeIDE_workspase/2023/kokasai2023_5m/CAN_library</location>
+		</link>
+		<link>
 			<name>HAL_Extension</name>
 			<type>2</type>
 			<location>C:/user_file/STM32CubeIDE_workspase/2023/kokasai2023_5m/HAL_Extension</location>

@@ -1,0 +1,3 @@
+[submodule "CAN_library"]
+	path = CAN_library
+	url = https://gitlab.com/grcc/library/can.git
