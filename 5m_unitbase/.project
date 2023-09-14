@@ -32,6 +32,11 @@
 	</natures>
 	<linkedResources>
 		<link>
+			<name>HAL_Extension</name>
+			<type>2</type>
+			<location>C:/user_file/STM32CubeIDE_workspase/2023/kokasai2023_5m/HAL_Extension</location>
+		</link>
+		<link>
 			<name>Drivers/STM32F3xx_HAL_Driver/stm32f3xx_hal.c</name>
 			<type>1</type>
 			<locationURI>PARENT-5-PROJECT_LOC/Users/takuj/STM32Cube/Repository/STM32Cube_FW_F3_V1.11.4/Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal.c</locationURI>
