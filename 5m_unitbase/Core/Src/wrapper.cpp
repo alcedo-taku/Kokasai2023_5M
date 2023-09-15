@@ -56,8 +56,16 @@ void init(void){
 	HAL_GPIO_WritePin(GPIO5_GPIO_Port, GPIO5_Pin, GPIO_PIN_SET);
 	HAL_GPIO_WritePin(GPIO6_GPIO_Port, GPIO6_Pin, GPIO_PIN_SET);
 	HAL_Delay(1000);
+
+	// タイマー割込み
 //	HAL_TIM_Base_Start_IT(&htim7);
+
+	// ADC
 	mcp3208_reader.init();
+
+	// エンコーダ
+	encoder[0].start();
+	encoder[1].start();
 }
 
 void loop(void){
@@ -67,6 +75,11 @@ void loop(void){
 
 	mcp3208_reader.update(0xF);
 	adc_value_array = mcp3208_reader.get();
+
+	for (uint8_t i = 0; i < 2; i++) {
+		encoder[i].update();
+		encoder_count[i] = encoder[i].getCount();
+	}
 }
 
 /* Function Body Begin */
