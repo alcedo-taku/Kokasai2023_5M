@@ -3,6 +3,7 @@
 /* Include Begin */
 #include "main.h"
 #include "HAL_Extension.hpp"
+#include "mcp3208.hpp"
 #include <array>
 /* Include End */
 
@@ -29,6 +30,9 @@ std::array<halex::Encoder, 2> encoder = {
 std::array<int32_t, 2> encoder_count;
 std::array<int32_t, 2> prev_encoder_count;
 
+mcp3208::MCP3208 mcp3208_reader(hspi2,SPI2_NSS_GPIO_Port,SPI2_NSS_Pin);
+std::array<uint16_t, 8> adc_value_array;
+
 /* Variable End */
 
 /* Class Constructor Begin */
@@ -53,10 +57,16 @@ void init(void){
 	HAL_GPIO_WritePin(GPIO6_GPIO_Port, GPIO6_Pin, GPIO_PIN_SET);
 	HAL_Delay(1000);
 //	HAL_TIM_Base_Start_IT(&htim7);
+	mcp3208_reader.init();
 }
 
 void loop(void){
+//	uint16_t adc_value;
+//	mcp3208_reader.update(mcp3208::Channel::CH_0, 0xF);
+//	adc_value_array[0] = mcp3208_reader.get(mcp3208::Channel::CH_0);
 
+	mcp3208_reader.update(0xF);
+	adc_value_array = mcp3208_reader.get();
 }
 
 /* Function Body Begin */
