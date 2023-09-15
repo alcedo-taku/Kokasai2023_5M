@@ -80,6 +80,10 @@ void loop(void){
 		encoder[i].update();
 		encoder_count[i] = encoder[i].getCount();
 	}
+
+	for(uint8_t i=0; i < motor.size(); i++){
+		motor[i].setSpeed(1000);
+	}
 }
 
 /* Function Body Begin */
