@@ -7,6 +7,10 @@
 #include <array>
 /* Include End */
 
+/* Define Begin */
+#define IS_MOTOR_TEST 1
+/* Define End */
+
 /* Enum Begin */
 /* Enum End */
 
@@ -15,7 +19,7 @@
 
 /* Variable Begin */
 // モータ
-std::array<halex::Motor, 7> motor = {
+std::array<halex::Motor, 4> motor = {
 		halex::Motor(&htim4,  TIM_CHANNEL_1, &htim4,  TIM_CHANNEL_2), // 0 1
 		halex::Motor(&htim1,  TIM_CHANNEL_1, &htim1,  TIM_CHANNEL_2), // 1 2
 		halex::Motor(&htim8,  TIM_CHANNEL_1, &htim8,  TIM_CHANNEL_2), // 2 3
@@ -58,7 +62,7 @@ void init(void){
 	HAL_Delay(1000);
 
 	// タイマー割込み
-//	HAL_TIM_Base_Start_IT(&htim7);
+	HAL_TIM_Base_Start_IT(&htim7);
 
 	// ADC
 	mcp3208_reader.init();
@@ -66,6 +70,8 @@ void init(void){
 	// エンコーダ
 	encoder[0].start();
 	encoder[1].start();
+
+	HAL_GPIO_WritePin(GPIO1_GPIO_Port, GPIO1_Pin, GPIO_PIN_RESET);
 }
 
 void loop(void){
@@ -90,7 +96,45 @@ void loop(void){
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 	//割り込みの処理内容
 	if(htim == &htim7){
-
+		HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_RESET);
+#if IS_MOTOR_TEST
+		// MD実験用
+		static uint16_t experiment_timer;
+		experiment_timer++;
+		switch (experiment_timer) {
+			case 1000:
+				for(uint8_t i=0; i < motor.size(); i++){
+					motor[i].setSpeed(500);
+				}
+//				servo.set_pulse_width(1000);
+//				HAL_GPIO_WritePin(Solenoid_0_GPIO_Port, Solenoid_0_Pin, GPIO_PIN_SET);
+				HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_SET);
+				break;
+			case 2000:
+				for(uint8_t i=0; i < motor.size(); i++){
+					motor[i].setSpeed(500);
+				}
+				HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_RESET);
+				break;
+			case 3000:
+				for(uint8_t i=0; i < motor.size(); i++){
+					motor[i].setSpeed(-500);
+				}
+//				servo.set_pulse_width(2000);
+				HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_SET);
+				break;
+			case 4000:
+				for(uint8_t i=0; i < motor.size(); i++){
+					motor[i].setSpeed(0);
+				}
+				experiment_timer = 0;
+//				HAL_GPIO_WritePin(Solenoid_0_GPIO_Port, Solenoid_0_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_RESET);
+				break;
+			default:
+				break;
+		}
+#endif
 	}
 }
 /* Function Body End */
