@@ -64,6 +64,11 @@ void init(void){
 	// タイマー割込み
 	HAL_TIM_Base_Start_IT(&htim7);
 
+    //MD
+    for(uint8_t i=0; i < motor.size(); i++){
+    	motor[i].start();
+    }
+
 	// ADC
 	mcp3208_reader.init();
 
@@ -72,6 +77,8 @@ void init(void){
 	encoder[1].start();
 
 	HAL_GPIO_WritePin(GPIO1_GPIO_Port, GPIO1_Pin, GPIO_PIN_RESET);
+
+
 }
 
 void loop(void){
@@ -87,19 +94,17 @@ void loop(void){
 		encoder_count[i] = encoder[i].getCount();
 	}
 
-	for(uint8_t i=0; i < motor.size(); i++){
-		motor[i].setSpeed(1000);
-	}
 }
+
+uint16_t experiment_timer;
 
 /* Function Body Begin */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 	//割り込みの処理内容
 	if(htim == &htim7){
-		HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_RESET);
 #if IS_MOTOR_TEST
 		// MD実験用
-		static uint16_t experiment_timer;
+//		static uint16_t experiment_timer;
 		experiment_timer++;
 		switch (experiment_timer) {
 			case 1000:
@@ -112,7 +117,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 				break;
 			case 2000:
 				for(uint8_t i=0; i < motor.size(); i++){
-					motor[i].setSpeed(500);
+					motor[i].setSpeed(250);
 				}
 				HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_RESET);
 				break;
