@@ -5,6 +5,7 @@
 #include "HAL_Extension.hpp"
 #include "mcp3208.hpp"
 #include <array>
+#include "data_type.hpp"
 /* Include End */
 
 /* Define Begin */

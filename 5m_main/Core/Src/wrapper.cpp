@@ -1,6 +1,7 @@
 #include "wrapper.hpp"
 
 /* Include Begin */
+#include "data_type.hpp"
 /* Include End */
 
 /* Enum Begin */

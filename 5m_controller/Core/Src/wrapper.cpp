@@ -7,6 +7,7 @@
 #include "adc.h"
 #include "usart.h"
 #include "xbee.hpp"
+#include "data_type.hpp"
 
 //#define XBee_AT_MODE
 #define XBee_API_MODE
