@@ -35,6 +35,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/kokasai2023_5m/HAL_Extension}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/kokasai2023_5m/CAN_library}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/kokasai2023_5m/MCP3208_reader}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/kokasai2023_5m/data_type}&quot;"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler.input.1335700604" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler.input"/>
 							</tool>
@@ -55,6 +56,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/kokasai2023_5m/HAL_Extension}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/kokasai2023_5m/CAN_library}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/kokasai2023_5m/MCP3208_reader}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/kokasai2023_5m/data_type}&quot;"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.1410197039" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
@@ -78,6 +80,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/kokasai2023_5m/HAL_Extension}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/kokasai2023_5m/CAN_library}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/kokasai2023_5m/MCP3208_reader}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/kokasai2023_5m/data_type}&quot;"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.input.cpp.561130270" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.input.cpp"/>
 							</tool>
