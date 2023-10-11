@@ -12,9 +12,7 @@ constexpr uint64_t TARGET_XBee_ADDRESS = 0x0013A2004198443F; // 運転段階用
  * controller → main の通信データ
  */
 struct DataFromCtrlToMain{
-	std::array<int16_t, 4> joystick_data;
-	uint8_t button_state; //!< 非常停止、右発射、左発射、装填、旋回左、旋回右、（駆動高速）
-//	uint8_t check_sum;
+	uint8_t lock_on; //!< 1bit目:locked, 2bit目:lock
 };
 
 /**
@@ -29,26 +27,23 @@ struct DataFromMainToCtrl{
  */
 struct DataFromMainToUnit{
 	uint8_t debug_count = 0;
-//	uint8_t send_flag;
-//	std::array<int16_t, 7> motor_compare;	//!< モータの値（0~3:駆動、4:腰、5:右腕、6:左腕）
-//	float servo_angle; //!< 指の角度
-//	uint8_t command; //!< 右指ソレノイド、アウトリガー、右腕リセット待機中
+
 };
 
 /**
  * unitbase → main の通信データ
  */
 struct DataFromUnitToMain{
-	std::array<int32_t, 2> encoder_count;	//!< 腕のエンコーダの値 右、左 [count]
-	std::array<int32_t, 2> encoder_speed;	//!< 腕の速さ [count/s]
-	uint8_t command;						//!< 右腕リセット、左腕リセット
+	uint8_t hit_points; //!< 右3bitを使って0,1で格納
 };
 
 /**
  * controller →　unitbase の通信データ
  */
-struct DataFromControllerToUnit{
-
+struct DataFromCtrlToUnit{
+	int16_t left_handle;
+	int16_t right_handle;
+	bool is_pulled_trigger;
 };
 
 /**
