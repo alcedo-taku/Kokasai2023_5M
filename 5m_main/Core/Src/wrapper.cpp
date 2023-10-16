@@ -15,9 +15,39 @@
 /* Enum End */
 
 /* Struct Begin */
+struct GPIO_pin {
+    GPIO_TypeDef* GPIOx;
+    uint16_t GPIO_Pin;
+};
 /* Struct End */
 
 /* Variable Begin */
+//LED
+std::array<GPIO_pin,10> LED = {{
+	{L1_GPIO_Port, L1_Pin},
+	{L2_GPIO_Port, L2_Pin},
+	{L3_GPIO_Port, L3_Pin},
+	{L4_GPIO_Port, L4_Pin},
+	{L5_GPIO_Port, L5_Pin},
+	{L6_GPIO_Port, L6_Pin},
+	{L7_GPIO_Port, L7_Pin},
+	{L8_GPIO_Port, L8_Pin},
+	{L9_GPIO_Port, L9_Pin},
+	{L10_GPIO_Port, L10_Pin}
+}};
+//GPIO
+std::array<GPIO_pin,10> GPIO = {{
+	{G1_GPIO_Port, G1_Pin},
+	{G2_GPIO_Port, G2_Pin},
+	{G3_GPIO_Port, G3_Pin},
+	{G4_GPIO_Port, G4_Pin},
+	{G5_GPIO_Port, G5_Pin},
+	{G6_GPIO_Port, G6_Pin},
+	{G7_GPIO_Port, G7_Pin},
+	{G8_GPIO_Port, G8_Pin},
+	{G9_GPIO_Port, G9_Pin},
+	{G10_GPIO_Port, G10_Pin}
+}};
 // CAN
 //simpleCanUser can(&hcan);
 CanUser can(&hcan);
@@ -61,9 +91,13 @@ void init(void){
 //	HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING); // 受信　メールボックスを見るための割り込み
 	HAL_CAN_TxMailbox0CompleteCallback(&hcan);							// 送信できたかの確認の割り込み　HAL_CAN_TxMailbox0CompleteCallback
 
-
 	// タイマー割込み
 	HAL_TIM_Base_Start_IT(&htim17);
+
+	for (uint8_t i = 0; i < 10; ++i) {
+		HAL_GPIO_WritePin(LED[i].GPIOx, LED[i].GPIO_Pin, GPIO_PIN_SET);
+		HAL_Delay(100);
+	}
 }
 
 void loop(void){
