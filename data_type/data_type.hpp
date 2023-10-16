@@ -34,6 +34,7 @@ struct DataFromMainToUnit{
  * unitbase → main の通信データ
  */
 struct DataFromUnitToMain{
+	uint8_t debug_count = 0;
 	uint8_t hit_points; //!< 右3bitを使って0,1で格納
 };
 
@@ -66,10 +67,10 @@ struct DataFromUnitToUnit{
 struct CanId{
 	uint32_t main_to_unit	= 0x1;
 	uint32_t main_to_ctrl	= 0x2;
-	uint32_t ctrl1_to_main  = 0x3;
-	uint32_t ctrl2_to_main  = 0x4;
-	uint32_t unit1_to_main  = 0x5;
-	uint32_t unit2_to_main  = 0x6;
+	uint32_t ctrl0_to_main  = 0x3;
+	uint32_t ctrl1_to_main  = 0x4;
+	uint32_t unit0_to_main  = 0x5;
+	uint32_t unit1_to_main  = 0x6;
 	uint32_t unit0_to_unit1 = 0x7;
 	uint32_t unit1_to_unit0 = 0x8;
 }can_id;

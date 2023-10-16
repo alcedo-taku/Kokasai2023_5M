@@ -62,9 +62,12 @@ HAL_CAN_StateTypeDef can_state_;
 uint16_t rx0_callback_count = 0;
 uint16_t transmit_frequency = 300; //データの更新周波数
 uint8_t number_of_id = 8;
-DataFromMainToUnit data_to_unit;
-//DataFromUnitToUnit data__unit;
+DataFromMainToUnit data_to_unit0;
+DataFromMainToUnit data_to_unit1;
+DataFromUnitToUnit data_from_unit0;
+DataFromUnitToUnit data_from_unit1;
 uint8_t debug_count = 0;
+uint32_t mailbox;
 
 /* Variable End */
 
@@ -79,16 +82,17 @@ void init(void){
 	// CAN
 	// canの初期設定
 	can.init();
-//	can.setFilterActivationState(ENABLE);
-//	can.setFilterMode(CAN_FilterMode::PATH_FOUR_TYPE_STD_ID);
-//	can.setFilterBank(14);
-//	can.setStoreRxFifo(CAN_RX_FIFO0);
-//	can.setFourTypePathId(100, 200, 300, 400);
-//	can.setFourTypePathId(can_id.main_to_unit, can_id.unit0_to_unit1,can_id.unit1_to_unit0, 100);
-//	can.setFilterConfig();
+	// 受信設定
+	can.setFilterActivationState(ENABLE); // フィルタを有効化
+	can.setFilterMode(CAN_FilterMode::PATH_FOUR_TYPE_STD_ID); // 16bitID リストモード ４種類のIDが追加可能
+	can.setFilterBank(14); // どこまでのバンクを使うか
+	can.setStoreRxFifo(CAN_RX_FIFO0); // 使うFIFOメモリ＿
+	can.setFourTypePathId(can_id.unit0_to_main, can_id.unit1_to_main, can_id.ctrl0_to_main, can_id.ctrl1_to_main); // to main のメッセージid
+	can.setFilterConfig(); // フィルターの設定を反映する
+	HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING); // 受信割り込みの有効化
+	// 送信設定
 	can.setDataFrame(CAN_RTR_DATA);	// canのデータの構造を決める
-	HAL_CAN_ActivateNotification(&hcan, CAN_IT_TX_MAILBOX_EMPTY);     // 送信　メールボックスを見るための割り込み
-//	HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING); // 受信　メールボックスを見るための割り込み
+	HAL_CAN_ActivateNotification(&hcan, CAN_IT_TX_MAILBOX_EMPTY);		// 送信　メールボックスを見るための割り込み
 	HAL_CAN_TxMailbox0CompleteCallback(&hcan);							// 送信できたかの確認の割り込み　HAL_CAN_TxMailbox0CompleteCallback
 
 	// タイマー割込み
@@ -121,26 +125,22 @@ void HAL_CAN_TxMailbox1CompleteCallback(CAN_HandleTypeDef *hcan){
 
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
-	//割り込みの処理内容
+	//　割り込みの処理内容
 	if(htim == &htim17){
 		static uint16_t experiment_timer;
 		experiment_timer++;
 		switch (experiment_timer) {
 			case 1000:
 				HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_SET);
-				HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET);
 				break;
 			case 2000:
 				HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_RESET);
-				HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
 				break;
 			case 3000:
 				HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_SET);
-				HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET);
 				break;
 			case 4000:
 				HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_RESET);
-				HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
 				experiment_timer = 0;
 				break;
 			default:
@@ -148,9 +148,35 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		}
 
 		can.setId(CAN_ID_STD, can_id.main_to_unit);
-		data_to_unit.debug_count++;
-		can_state = can.transmit(sizeof(data_to_unit), (uint8_t*)&data_to_unit);
+		data_to_unit0.debug_count++;
+		can_state = can.transmit(sizeof(data_to_unit0), (uint8_t*)&data_to_unit0);
 		can_state_ = can.getState();
+		mailbox = can.getUsedTxMailbox();
+	}
+}
+
+// CAN受信
+void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan){
+	std::array<uint8_t,8>buf{};
+	can_state = can.receive(CAN_RX_FIFO0,(uint8_t*)&buf);
+	rx_id = can.getRxId();
+	if(can_state == CAN_StatusType::HAL_OK){
+//		__HAL_TIM_SET_COUNTER(&htim13, 0);
+//		disconnect_count = 0;
+		if(can_id.unit0_to_main == can.getRxId()){
+			memcpy(&data_from_unit0,&buf,sizeof(data_from_unit0));
+//			debug_count = data_receive_unit.debug_count;
+//			ここに通信入れる？
+		}else if(can_id.unit1_to_main == can.getRxId()){
+			memcpy(&data_from_unit1, &buf, sizeof(data_from_unit1));
+		}
+	}
+	// 通信確認インジケータ
+	static uint8_t blink_count = 0;
+	blink_count++;
+	if(blink_count == 100){
+		HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
+		blink_count = 0;
 	}
 }
 /* Function Body End */

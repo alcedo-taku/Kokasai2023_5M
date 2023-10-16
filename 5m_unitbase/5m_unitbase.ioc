@@ -1,13 +1,13 @@
 #MicroXplorer Configuration settings - do not modify
 CAN.ABOM=ENABLE
-CAN.BS1=CAN_BS1_15TQ
-CAN.BS2=CAN_BS2_4TQ
-CAN.CalculateBaudRate=125000
-CAN.CalculateTimeBit=8000
-CAN.CalculateTimeQuantum=400.0
+CAN.BS1=CAN_BS1_7TQ
+CAN.BS2=CAN_BS2_2TQ
+CAN.CalculateBaudRate=1000000
+CAN.CalculateTimeBit=1000
+CAN.CalculateTimeQuantum=100.0
 CAN.IPParameters=CalculateTimeQuantum,CalculateTimeBit,CalculateBaudRate,Prescaler,BS1,BS2,ABOM,NART
 CAN.NART=ENABLE
-CAN.Prescaler=12
+CAN.Prescaler=3
 Dma.Request0=USART2_RX
 Dma.RequestsNb=1
 Dma.USART2_RX.0.Direction=DMA_PERIPH_TO_MEMORY
@@ -97,6 +97,7 @@ NVIC.SVCall_IRQn=true\:0\:0\:false\:false\:true\:false\:false\:false
 NVIC.SysTick_IRQn=true\:0\:0\:false\:false\:true\:false\:true\:false
 NVIC.TIM1_TRG_COM_TIM17_IRQn=true\:0\:0\:false\:false\:true\:true\:true\:true
 NVIC.TIM7_IRQn=true\:0\:0\:false\:false\:true\:true\:true\:true
+NVIC.USB_HP_CAN_TX_IRQn=true\:0\:0\:false\:false\:true\:true\:true\:true
 NVIC.USB_LP_CAN_RX0_IRQn=true\:0\:0\:false\:false\:true\:true\:true\:true
 NVIC.UsageFault_IRQn=true\:0\:0\:false\:false\:true\:false\:false\:false
 PA0.Locked=true
