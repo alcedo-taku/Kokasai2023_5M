@@ -7,3 +7,6 @@
 [submodule "HAL_Extension"]
 	path = HAL_Extension
 	url = https://gitlab.com/grcc/library/hal_extension.git
+[submodule "Automatic_Control_Assistant"]
+	path = Automatic_Control_Assistant
+	url = https://gitlab.com/grcc/library/automatic_control_assistant.git
