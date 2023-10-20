@@ -64,18 +64,18 @@ constexpr std::array<GPIO_pin,4> led_pin = {{
 }};
 constexpr std::array<GPIO_pin,13> gpio_pin = {{
 	// 回路上の印字と実際の配線が異なるので注意
-	{GPIOA, GPIO_PIN_4},
+	{GPIOA, GPIO_PIN_4},	// pwm スピーカー
 	{GPIOA, GPIO_PIN_5},
 	{GPIOA, GPIO_PIN_6},
 	{GPIOB, GPIO_PIN_2},
-	{GPIOE, GPIO_PIN_8},
-	{GPIOE, GPIO_PIN_9},
-	{GPIOF, GPIO_PIN_1},
-	{GPIOF, GPIO_PIN_0},
-	{GPIOC, GPIO_PIN_15},
-	{GPIOC, GPIO_PIN_14},	// in 的0
-	{GPIOC, GPIO_PIN_13},	// in 的1
-	{GPIOF, GPIO_PIN_6},	// in 的2
+	{GPIOE, GPIO_PIN_8},	// out lock on
+	{GPIOE, GPIO_PIN_9},	// out locked on
+	{GPIOF, GPIO_PIN_1},	// out 的0 LED
+	{GPIOF, GPIO_PIN_0},	// out 的1　LED
+	{GPIOC, GPIO_PIN_15},	// out 的2 LED
+	{GPIOC, GPIO_PIN_14},	// in
+	{GPIOC, GPIO_PIN_13},	// in
+	{GPIOF, GPIO_PIN_6},	// in トリガー
 	{GPIOF, GPIO_PIN_7}		// in コントローラの番号を決める
 }};
 DataFromUnitToCtrl data_from_unit;

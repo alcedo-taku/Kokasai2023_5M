@@ -92,6 +92,7 @@ int main(void)
   MX_I2C1_Init();
   MX_CAN_Init();
   MX_SPI2_Init();
+  MX_TIM16_Init();
   /* USER CODE BEGIN 2 */
   init();//written by user
   /* USER CODE END 2 */

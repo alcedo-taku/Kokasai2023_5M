@@ -76,22 +76,22 @@ struct DataFromUnitToUnit{
  * can data の id
  */
 struct CanId{
-	// main to
-	static constexpr uint32_t main_to_unit	= 0x1;
-	static constexpr uint32_t main_to_ctrl	= 0x2; // 不要
-	// to main
-	static constexpr uint32_t ctrl0_to_main  = 0x3; // 不要
-	static constexpr uint32_t ctrl1_to_main  = 0x4; // 不要
-	static constexpr uint32_t unit0_to_main  = 0x5;
-	static constexpr uint32_t unit1_to_main  = 0x6;
 	// unit to unit
-	static constexpr uint32_t unit0_to_unit1 = 0x7;
-	static constexpr uint32_t unit1_to_unit0 = 0x8;
+	static constexpr uint32_t unit0_to_unit1 = 0x100;
+	static constexpr uint32_t unit1_to_unit0 = 0x101;
+	// main to
+	static constexpr uint32_t main_to_unit	= 0x113;
+	static constexpr uint32_t main_to_ctrl	= 0x114; // 不要
+	// to main
+	static constexpr uint32_t ctrl0_to_main  = 0x103; // 不要
+	static constexpr uint32_t ctrl1_to_main  = 0x104; // 不要
+	static constexpr uint32_t unit0_to_main  = 0x105;
+	static constexpr uint32_t unit1_to_main  = 0x106;
 	// unit - ctrl
-	static constexpr uint32_t ctrl0_to_unit0 = 0x9;
-	static constexpr uint32_t ctrl1_to_unit1 = 0x10;
-	static constexpr uint32_t unit0_to_ctrl0 = 0x11;
-	static constexpr uint32_t unit1_to_ctrl1 = 0x12;
+	static constexpr uint32_t ctrl0_to_unit0 = 0x109;
+	static constexpr uint32_t ctrl1_to_unit1 = 0x110;
+	static constexpr uint32_t unit0_to_ctrl0 = 0x111;
+	static constexpr uint32_t unit1_to_ctrl1 = 0x112;
 }can_id;
 
 /** 通信 **/
