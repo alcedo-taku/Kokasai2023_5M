@@ -98,6 +98,7 @@ int main(void)
   MX_USART1_UART_Init();
   MX_TIM16_Init();
   MX_CAN_Init();
+  MX_TIM12_Init();
   /* USER CODE BEGIN 2 */
   init();
   /* USER CODE END 2 */
