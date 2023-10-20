@@ -79,6 +79,11 @@ constexpr std::array<GPIO_pin,13> gpio_pin = {{
 	{GPIOF, GPIO_PIN_6},	// in トリガー
 	{GPIOF, GPIO_PIN_7}		// in コントローラの番号を決める
 }};
+Music music_start[6]     = { {SoundScale::E4, 250}, {SoundScale::R, 750}, {SoundScale::E4, 250}, {SoundScale::R, 750}, {SoundScale::E5, 1000}, {SoundScale::R, 2000},  }; // 音階と各音の時間を指定
+Music music_locked_on[2] = { {SoundScale::E2, 1600}, {SoundScale::R, 500} };
+Music music_hited[2]     = { {SoundScale::C2, 200}, {SoundScale::R, 1000} };
+Music music_hit[2]       = { {SoundScale::C5, 200}, {SoundScale::R, 1000} };
+PwmSounds pwm_sounds(&htim12, TIM_CHANNEL_1);
 DataFromUnitToCtrl data_from_unit;
 DataFromCtrlToUnit data_to_unit;
 DataFromMainToCtrl data_from_main;
@@ -141,6 +146,8 @@ void init(void){
 	adc0Range = 200;
 	HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adcBuf, 4);
 
+	// PWM sound
+	pwm_sounds.set_sounds(music_start, (uint8_t)(sizeof(music_start)/sizeof(Music)));
 
 	HAL_Delay(1000);
 
@@ -193,13 +200,14 @@ void init(void){
 void loop(void){
 }
 
-
 /* Function Body Begin */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 	if(htim == &htim17){
 		data_t data;
 		readSW(data.sw);
 		readJoystick(data.joystick);
+		pwm_sounds.start_sounds();
+		pwm_sounds.update_sounds();
 		HAL_GPIO_WritePin(led_pin[2].GPIOx, led_pin[2].GPIO_Pin, GPIO_PIN_SET);
 
 #if XBee
