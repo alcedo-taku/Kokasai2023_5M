@@ -161,7 +161,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 				break;
 			case 1:
 				// to controller
-				can.setId(CAN_ID_STD, can_id.main_to_unit);
+				can.setId(CAN_ID_STD, can_id.main_to_ctrl);
 				data_to_ctrl.debug_count++;
 				can_state = can.transmit(sizeof(data_to_ctrl), (uint8_t*)&data_to_ctrl);
 				can_state_ = can.getState();
