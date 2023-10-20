@@ -21,21 +21,21 @@
 /* Variable Begin */
 //LED
 constexpr std::array<GPIO_pin,10> LED = {{
-	{L1_GPIO_Port, L1_Pin},
-	{L2_GPIO_Port, L2_Pin},
+	{L1_GPIO_Port, L1_Pin},		// 試合中は点灯
+	{L2_GPIO_Port, L2_Pin},		//
 	{L3_GPIO_Port, L3_Pin},
 	{L4_GPIO_Port, L4_Pin},
-	{L5_GPIO_Port, L5_Pin},
-	{L6_GPIO_Port, L6_Pin},
-	{L7_GPIO_Port, L7_Pin},
-	{L8_GPIO_Port, L8_Pin},
-	{L9_GPIO_Port, L9_Pin},
-	{L10_GPIO_Port, L10_Pin}
+	{L5_GPIO_Port, L5_Pin},		// 的 0-0
+	{L6_GPIO_Port, L6_Pin},		// 的 1-0
+	{L7_GPIO_Port, L7_Pin},		// 的 0-1
+	{L8_GPIO_Port, L8_Pin},		// 的 1-1
+	{L9_GPIO_Port, L9_Pin},		// 的 0-2
+	{L10_GPIO_Port, L10_Pin} 	// 的 1-2
 }};
 //GPIO
 constexpr std::array<GPIO_pin,10> GPIO = {{
-	{G1_GPIO_Port, G1_Pin},
-	{G2_GPIO_Port, G2_Pin},
+	{G1_GPIO_Port, G1_Pin}, 	// スタート/ストップ
+	{G2_GPIO_Port, G2_Pin}, 	// リセット
 	{G3_GPIO_Port, G3_Pin},
 	{G4_GPIO_Port, G4_Pin},
 	{G5_GPIO_Port, G5_Pin},
@@ -86,7 +86,6 @@ void init(void){
 	can.setFilterMode(CAN_FilterMode::PATH_FOUR_TYPE_STD_ID); // 16bitID リストモード ４種類のIDが追加可能
 	can.setFilterBank(14); // どこまでのバンクを使うか
 	can.setStoreRxFifo(CAN_RX_FIFO0); // 使うFIFOメモリ＿
-//	can.setFourTypePathId(can_id.unit0_to_main, can_id.unit1_to_main, 200, 400); // to main のメッセージid
 	can.setFourTypePathId(can_id.unit0_to_main, can_id.unit1_to_main, can_id.ctrl0_to_main, can_id.ctrl1_to_main); // to main のメッセージid
 	can.setFilterConfig(); // フィルターの設定を反映する
 	HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING); // 受信割り込みの有効化
