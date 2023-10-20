@@ -16,6 +16,7 @@
 #include "tim.h"
 #include "adc.h"
 #include "xbee.hpp"
+#include "PwmSounds.hpp"
 #include "data_type.hpp"
 #include "can_user/can_user.hpp"
 

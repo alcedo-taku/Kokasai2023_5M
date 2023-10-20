@@ -7,3 +7,6 @@
 [submodule "HAL_Extension"]
 	path = HAL_Extension
 	url = https://gitlab.com/grcc/library/hal_extension.git
+[submodule "PWM_Sound"]
+	path = PWM_Sound
+	url = https://gitlab.com/grcc/library/pwm-sound.git
