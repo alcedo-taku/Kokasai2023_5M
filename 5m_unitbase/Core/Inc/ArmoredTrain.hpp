@@ -25,7 +25,8 @@ struct InputData {
 };
 
 struct OutputData {
-
+	// モータのcounter period
+	uint8_t lock_on; // ロックオンできたか
 };
 
 struct FieldData{
@@ -81,10 +82,12 @@ private:
 	aca::PID_controller pid_position = aca::PID_controller (pid_parameter_position, frequency);
 	aca::PID_Element pid_parameter_angle {5,0,0};
 	aca::PID_controller pid_angle = aca::PID_controller (pid_parameter_angle, frequency);
-	void calc_initial_velocity();	//<! 砲弾の初速度を求める
-	void judge_locked_on();
 	void convert_to_SI(RobotSensorData& sensor_data, RobotMovementData& movement_data);
+	void calc_initial_velocity();	//<! 砲弾の初速度を求める
+	void calc_pos_fut(RobotMovementData& movement_data_now, RobotMovementData movement_data_fut, uint16_t time_lug);
 	void calc_pos_of_target(RobotMovementData& mydata, RobotMovementData& enemydata);		//<! 本体の位置から的の位置を計算する
+	uint8_t judge_target();
+	void calc_output();
 public:
 	ArmoredTrain();
 	void update(InputData& input_data, OutputData& output_data);

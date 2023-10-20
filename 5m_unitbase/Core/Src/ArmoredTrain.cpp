@@ -17,6 +17,20 @@ ArmoredTrain::ArmoredTrain() {
 }
 
 /**
+ * センサーの入力を、SI単位系に変換する関数
+ * @param sensor_data
+ * @param movement_data
+ */
+void ArmoredTrain:: convert_to_SI(RobotSensorData& sensor_data, RobotMovementData& movement_data) {
+	static RobotSensorData prev_sensor_data;
+	movement_data.angle_of_turret			 = sensor_data.pot_angle_of_turret * 0.01;
+	movement_data.position					 = sensor_data.enc_position * 0.1;
+	movement_data.angular_velocity_of_truret = (sensor_data.pot_angle_of_turret	 - prev_sensor_data.pot_angle_of_turret	) * 0.01 * frequency;
+	movement_data.velocity					 = (sensor_data.enc_position		 - prev_sensor_data.enc_position		) * 0.1 * frequency;
+	movement_data.roller_rotation			 = (sensor_data.enc_roller_rotation	 - prev_sensor_data.enc_roller_rotation	) * 0.001 * frequency;
+}
+
+/**
  * 砲弾の初速度を計算する関数
  */
 void ArmoredTrain::calc_initial_velocity() {
@@ -34,24 +48,17 @@ void ArmoredTrain::calc_initial_velocity() {
 }
 
 /**
- * ロックオンされているかを判定する
+ * 未来の位置を予測する
+ * @param movement_data_now
+ * @param movement_data_fut
+ * @param time_lug
  */
-void ArmoredTrain:: judge_locked_on() {
+void ArmoredTrain::calc_pos_fut(RobotMovementData& movement_data_now, RobotMovementData movement_data_fut, uint16_t time_lug){
+	// 今の直線距離から、時間を決める
 
-}
+	// その時間から未来の時間を決める
 
-/**
- * センサーの入力を、SI単位系に変換する関数
- * @param sensor_data
- * @param movement_data
- */
-void ArmoredTrain:: convert_to_SI(RobotSensorData& sensor_data, RobotMovementData& movement_data) {
-	static RobotSensorData prev_sensor_data;
-	movement_data.angle_of_turret			 = sensor_data.pot_angle_of_turret * 0.01;
-	movement_data.position					 = sensor_data.enc_position * 0.1;
-	movement_data.angular_velocity_of_truret = (sensor_data.pot_angle_of_turret	 - prev_sensor_data.pot_angle_of_turret	) * 0.01 * frequency;
-	movement_data.velocity					 = (sensor_data.enc_position		 - prev_sensor_data.enc_position		) * 0.1 * frequency;
-	movement_data.roller_rotation			 = (sensor_data.enc_roller_rotation	 - prev_sensor_data.enc_roller_rotation	) * 0.001 * frequency;
+	// 未来の距離から時間を決める
 }
 
 /**
@@ -65,6 +72,22 @@ void ArmoredTrain::calc_pos_of_target(RobotMovementData& mydata, RobotMovementDa
 		target[i].l = std::sqrt(x*x + y*y);
 		target[i].angle = std::atan2(x, y);
 	}
+}
+
+/**
+ * どの的を狙うか、昇順補助するか、ロックオンできているか
+ */
+uint8_t ArmoredTrain:: judge_target() {
+	uint8_t target;
+
+	return target;
+}
+
+/**
+ * 出力構造体の計算
+ */
+void ArmoredTrain::calc_output(){
+
 }
 
 /**
