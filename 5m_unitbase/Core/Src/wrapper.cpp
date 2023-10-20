@@ -1,3 +1,13 @@
+/**
+ * 回路の印字は相変わらず間違っている
+ * GPIO
+ * ピン配置：文字を読む方から見て上から順に0-5と番号を振った
+ * 0:そのunitbaseの番号を決める、ジャンパーあり→0, なし→1
+ *
+ * LED
+ * PD1			:タイマー割り込み
+ * PC15(GPIO6)	:受信成功時点滅
+ */
 #include "wrapper.hpp"
 
 /* Include Begin */
@@ -59,10 +69,12 @@ HAL_CAN_StateTypeDef can_state_;
 uint16_t rx0_callback_count = 0;
 uint16_t transmit_frequency = 300; //データの更新周波数
 uint8_t number_of_id = 8;
-DataFromUnitToUnit data_from_unit;
+DataFromUnitToUnit data_from_unit0;
 DataFromUnitToUnit data_to_unit;
 DataFromMainToUnit data_from_main;
 DataFromUnitToMain data_to_main;
+DataFromCtrlToUnit data_from_ctrl;
+DataFromUnitToCtrl data_to_ctrl;
 uint8_t debug_count = 0;
 
 
@@ -105,14 +117,18 @@ void init(void){
 	encoder[1].start();
 
 	// CAN
-	// canの初期設定
+	// CANの初期設定
 	can.init();
 	// 受信設定
 	can.setFilterActivationState(ENABLE); // フィルタを有効化
 	can.setFilterMode(CAN_FilterMode::PATH_FOUR_TYPE_STD_ID); // 16bitID リストモード ４種類のIDが追加可能
 	can.setFilterBank(14); // どこまでのバンクを使うか
 	can.setStoreRxFifo(CAN_RX_FIFO0); // 使うFIFOメモリ＿
-	can.setFourTypePathId(can_id.main_to_unit, can_id.unit0_to_unit1,can_id.unit1_to_unit0, 100);
+	if (unit_num == 0) {
+		can.setFourTypePathId(can_id.main_to_unit, can_id.unit1_to_unit0, can_id.ctrl0_to_unit0, 100);
+	}else if (unit_num == 1){
+		can.setFourTypePathId(can_id.main_to_unit, can_id.unit0_to_unit1, can_id.ctrl1_to_unit1, 100);
+	}
 	can.setFilterConfig(); // フィルターの設定を反映する
 	HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING); // 受信割り込みの有効化
 	// 送信設定
@@ -175,7 +191,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 				for(uint8_t i=0; i < motor.size(); i++){
 					motor[i].setSpeed(-500);
 				}
-//				servo.set_pulse_width(2000);
 				HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_SET);
 				break;
 			case 4000:
@@ -183,8 +198,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 					motor[i].setSpeed(0);
 				}
 				experiment_timer = 0;
-//				HAL_GPIO_WritePin(Solenoid_0_GPIO_Port, Solenoid_0_Pin, GPIO_PIN_RESET);
-				HAL_GPIO_WritePin(GPIO6_GPIO_Port, GPIO6_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_RESET);
 				break;
 			default:
 				break;
@@ -195,6 +209,18 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		static uint8_t can_transmit_count = 0;
 		switch(can_transmit_count){
 			case 0:
+				// to main
+				if (unit_num == 0) {
+					can.setId(CAN_ID_STD, can_id.unit0_to_main);
+				}else if (unit_num == 1){
+					can.setId(CAN_ID_STD, can_id.unit1_to_main);
+				}
+				data_to_main.debug_count++;
+				can_state = can.transmit(sizeof(data_to_main), (uint8_t*)&data_to_main);
+				can_transmit_count++;
+				break;
+			case 1:
+				// to unit
 				if (unit_num == 0) {
 					can.setId(CAN_ID_STD, can_id.unit0_to_unit1);
 				}else if (unit_num == 1){
@@ -204,14 +230,15 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 				can_state = can.transmit(sizeof(data_to_unit), (uint8_t*)&data_to_unit);
 				can_transmit_count++;
 				break;
-			case 1:
+			case 2:
+				// to controller
 				if (unit_num == 0) {
-					can.setId(CAN_ID_STD, can_id.unit0_to_main);
+					can.setId(CAN_ID_STD, can_id.unit0_to_ctrl0);
 				}else if (unit_num == 1){
-					can.setId(CAN_ID_STD, can_id.unit1_to_main);
+					can.setId(CAN_ID_STD, can_id.unit1_to_ctrl1);
 				}
-				data_to_main.debug_count++;
-				can_state = can.transmit(sizeof(data_to_main), (uint8_t*)&data_to_main);
+				data_to_ctrl.debug_count++;
+				can_state = can.transmit(sizeof(data_to_ctrl), (uint8_t*)&data_to_ctrl);
 				can_transmit_count = 0; // ラストは0にする
 				break;
 		}
@@ -240,12 +267,25 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan){
 	if(can_state == CAN_StatusType::HAL_OK){
 //		__HAL_TIM_SET_COUNTER(&htim13, 0);
 //		disconnect_count = 0;
-		if( (can_id.unit1_to_unit0 == can.getRxId() && unit_num == 0) || (can_id.unit0_to_unit1 == can.getRxId() && unit_num == 1) ){
-			memcpy(&data_from_unit,&buf,sizeof(data_from_unit));
-//			debug_count = data_from_unit.debug_count;
-//			ここに通信入れる？
-		}else if(can_id.main_to_unit == can.getRxId()){
-			memcpy(&data_from_main, &buf, sizeof(data_from_main));
+		switch (can.getRxId()) {
+			// from main
+			case can_id.main_to_unit:
+				memcpy(&data_from_main, &buf, sizeof(data_from_main));
+				break;
+
+			// from unit
+			case can_id.unit1_to_unit0:
+			case can_id.unit0_to_unit1:
+				memcpy(&data_from_unit0,&buf,sizeof(data_from_unit0));
+				break;
+
+			// from controller
+			case can_id.ctrl0_to_unit0:
+			case can_id.ctrl1_to_unit1:
+				memcpy(&data_from_ctrl,&buf,sizeof(data_from_ctrl));
+				break;
+			default:
+				break;
 		}
 	}
 	// 通信確認インジケータ
