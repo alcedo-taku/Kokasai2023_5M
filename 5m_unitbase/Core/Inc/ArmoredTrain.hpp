@@ -12,33 +12,51 @@
 
 namespace at {
 
+/**
+ * センサーの生値
+ */
 struct RobotSensorData {
 	uint16_t enc_roller_rotation;
 	int16_t enc_position;
 	uint32_t pot_angle_of_turret;
 };
 
+/**
+ * このクラスに入ってくる構造体
+ */
 struct InputData {
 	RobotSensorData myself;
 	RobotSensorData enemy;
 	bool is_pusshed_lounch_reset;
 };
 
+/**
+ * このクラスから出ていく構造体
+ */
 struct OutputData {
 	// モータのcounter period
 	uint8_t lock_on; // ロックオンできたか
 };
 
+/**
+ * フィールドの寸法等を格納する構造体
+ */
 struct FieldData{
 	static constexpr float opposing_distance = 0.5;	//<! 対向距離()[m]
 	static constexpr float rail_length = 2;			//<! 横移動可能長さ
 	static constexpr float gravity = 9.8;			//<! 重力加速度
 }field_data;
 
+/**
+ * ロボット上の的の位置を格納する構造体
+ */
 struct TargetPositionA {
 	float x,y,angle;
 };
 
+/**
+ * ロボットの静的な情報を格納する構造体
+ */
 struct RobotStaticData {
 	static constexpr float angle_of_depression = 12;	//<! 砲塔俯角[rad]
 	static constexpr float turret_length = 0.1;			//<! 旋回中心から速度計側部までの距離[m] (l0)
@@ -48,19 +66,34 @@ struct RobotStaticData {
 			{0.01, 0.01, 12},
 			{0.01, 0.01, 12},
 	}};
+	static constexpr float time_lug1 = 0.5;				//<! 射出までにかかる時間[s]
 }robot_static_data;
 
+/**
+ * 自分からの相対座標系での敵の的の角度
+ */
 struct TargetPositionR {
 	float l,angle;
 };
 
+/**
+ * ロボットの動的な情報を格納する構造体
+ */
 struct RobotMovementData {
 	float position;							//<! 位置[m]
 	float velocity;							//<! 速度[m/s]
 	float angle_of_turret;					//<! 砲塔角度[rad]
 	float angular_velocity_of_truret;		//<! 砲塔角速度[rad/s]
-	float angle_of_depression;				//<! 砲塔俯角[rad]
+//	float angle_of_depression;				//<! 砲塔俯角[rad]
 	float roller_rotation;					//<! ローラー回転数[rad/s]
+};
+
+/**
+ * 自分と敵の情報のセットを格納する構造体
+ */
+struct RobotMovementDataSet {
+	RobotMovementData myself;   //<! 自分の動き
+	RobotMovementData enemy;    //<! 敵の動き
 };
 
 struct BulletVelocity {
@@ -69,22 +102,35 @@ struct BulletVelocity {
 
 constexpr uint16_t frequency = 1000;
 
+/**
+ * 発射時のパラメータを格納する構造体
+ */
+struct ShotData {
+	float l;
+	float v0;
+	float time;
+};
 
 class ArmoredTrain {
 private:
-	RobotMovementData myself;		//<! 自分の動き
-	RobotMovementData enemy;		//<! 敵の動き
+//	RobotMovementData myself;		//<! 自分の動き
+//	RobotMovementData enemy;		//<! 敵の動き
+	RobotMovementDataSet now;
+	RobotMovementDataSet future;
 	std::array<TargetPositionR, 3> target;	//<! 的の位置
 	BulletVelocity bullet_velocity;
 	InputData input_data;
 	OutputData output_data;
+	ShotData shot_data;
 	aca::PID_Element pid_parameter_position = {5,0,0};
 	aca::PID_controller pid_position = aca::PID_controller (pid_parameter_position, frequency);
 	aca::PID_Element pid_parameter_angle {5,0,0};
 	aca::PID_controller pid_angle = aca::PID_controller (pid_parameter_angle, frequency);
 	void convert_to_SI(RobotSensorData& sensor_data, RobotMovementData& movement_data);
-	void calc_initial_velocity();	//<! 砲弾の初速度を求める
+	void calc_initial_velocity();	//<! 砲弾の初速度を求める 運動学　いらない
+	void calc_roller_rotation();
 	void calc_pos_fut(RobotMovementData& movement_data_now, RobotMovementData movement_data_fut, uint16_t time_lug);
+	void calc_shot(RobotMovementDataSet& movement_data, ShotData& shot_data);
 	void calc_pos_of_target(RobotMovementData& mydata, RobotMovementData& enemydata);		//<! 本体の位置から的の位置を計算する
 	uint8_t judge_target();
 	void calc_output();

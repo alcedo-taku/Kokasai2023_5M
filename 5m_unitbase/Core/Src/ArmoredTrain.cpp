@@ -31,20 +31,27 @@ void ArmoredTrain:: convert_to_SI(RobotSensorData& sensor_data, RobotMovementDat
 }
 
 /**
- * 砲弾の初速度を計算する関数
+ * 砲弾の絶対座標系での初速度を計算する関数
  */
 void ArmoredTrain::calc_initial_velocity() {
-	float abs_bullet_velocity = robot_static_data.radius_of_roller * myself.roller_rotation;
-	float cos_depression = std::cos(robot_static_data.angle_of_depression);
-	float sin_depression = std::sin(robot_static_data.angle_of_depression);
-	float cos_turret = std::cos(myself.angle_of_turret + M_PI_2);
-	float sin_turret = std::sin(myself.angle_of_turret + M_PI_2);
+	float abs_bullet_velocity = robot_static_data.radius_of_roller * now.myself.roller_rotation;
+	constexpr float cos_depression = std::cos(robot_static_data.angle_of_depression);
+	constexpr float sin_depression = std::sin(robot_static_data.angle_of_depression);
+	float cos_turret = std::cos(now.myself.angle_of_turret + M_PI_2);
+	float sin_turret = std::sin(now.myself.angle_of_turret + M_PI_2);
 	bullet_velocity.x = abs_bullet_velocity * cos_depression * cos_turret
-						+ myself.velocity
-						- robot_static_data.turret_length * myself.roller_rotation * sin_turret;
+						+ now.myself.velocity
+						- robot_static_data.turret_length * now.myself.roller_rotation * sin_turret;
 	bullet_velocity.y = abs_bullet_velocity * cos_depression * sin_turret
-						+ robot_static_data.turret_length * myself.roller_rotation * cos_turret;
+						+ robot_static_data.turret_length * now.myself.roller_rotation * cos_turret;
 	bullet_velocity.z = abs_bullet_velocity * sin_depression;
+}
+
+/**
+ * ローラーの速度と、角度を求める
+ */
+void ArmoredTrain::calc_roller_rotation() {
+
 }
 
 /**
@@ -54,11 +61,23 @@ void ArmoredTrain::calc_initial_velocity() {
  * @param time_lug
  */
 void ArmoredTrain::calc_pos_fut(RobotMovementData& movement_data_now, RobotMovementData movement_data_fut, uint16_t time_lug){
-	// 今の直線距離から、時間を決める
+	movement_data_fut.velocity 						= movement_data_now.velocity;
+	movement_data_fut.position 						= movement_data_now.position 		+ movement_data_fut.velocity * time_lug;
+	movement_data_fut.angular_velocity_of_truret 	= movement_data_now.angular_velocity_of_truret;
+	movement_data_fut.angle_of_turret 				= movement_data_now.angle_of_turret + movement_data_fut.angular_velocity_of_truret * time_lug;
+}
 
-	// その時間から未来の時間を決める
-
-	// 未来の距離から時間を決める
+void ArmoredTrain::calc_shot(RobotMovementDataSet& movement_data, ShotData& shot_data){
+	// 2台間の距離を計算
+	float x = movement_data.myself.position + movement_data.enemy.position - field_data.rail_length;
+	float y = field_data.opposing_distance;
+	shot_data.l = std::sqrt(x*x + y*y);
+	// どの速度なら届くかを計算
+	constexpr float cos_depression = std::cos(robot_static_data.angle_of_depression);
+	constexpr float sin_depression = std::sin(robot_static_data.angle_of_depression);
+	shot_data.v0 = std::sqrt( (shot_data.l*field_data.gravity) / (2*sin_depression*cos_depression) );
+	// その速度でどのくらいの時間がかかるか計算
+	shot_data.time = 2*shot_data.v0*sin_depression/field_data.gravity;
 }
 
 /**
@@ -78,6 +97,7 @@ void ArmoredTrain::calc_pos_of_target(RobotMovementData& mydata, RobotMovementDa
  * どの的を狙うか、昇順補助するか、ロックオンできているか
  */
 uint8_t ArmoredTrain:: judge_target() {
+//	todo ここやる！
 	uint8_t target;
 
 	return target;
@@ -97,8 +117,32 @@ void ArmoredTrain::calc_output(){
  */
 void ArmoredTrain::update(InputData& input_data, OutputData& output_data) {
 	this->input_data = input_data;
-	convert_to_SI(input_data.myself, myself);
-	convert_to_SI(input_data.enemy, enemy);
+	// SI単位系に変換
+	convert_to_SI(input_data.myself, now.myself);
+	convert_to_SI(input_data.enemy, now.enemy);
+//	ここから
+	// 射出時にいる位置を計算
+	calc_pos_fut(now.myself, future.myself, robot_static_data.time_lug1);
+	calc_pos_fut(now.enemy, future.enemy, robot_static_data.time_lug1);
+	// 射出に必要な情報(飛翔時間等)を計算
+	calc_shot(future, shot_data);
+	// 未来の位置を計算
+	calc_pos_fut(now.myself, future.myself, shot_data.time + robot_static_data.time_lug1);
+	calc_pos_fut(now.enemy, future.enemy, shot_data.time + robot_static_data.time_lug1);
+	// 射出に必要な情報(飛翔時間等)を再計算
+	// 未来の位置を再計算
+//	ここまでの計算mainでやってもいいのでは？　ま、一旦そのままでやるけど
+
+	// 未来の位置から、的中心への向きを求める
+	calc_pos_of_target(future.myself, future.enemy);
+	// 今の状態だとどの方向にどの方向に飛んでいくかを計算　とりま、今向いている角度でよくね？
+	calc_initial_velocity(); // todo 飛んでいく角度を変数に入力？　とりあえずやらなくてよくない
+	// どの的を狙うかを計算
+	judge_target();
+	// 発射パラメータ（ローラの速度、発射方向）を計算　とりま発射方向は的の角度でよくね？
+// todo ここどうにかする　とりまローラ速度だけで考えることはいいだろ
+	// pid等の処理をする
+	calc_output();
 }
 
 } /* namespace at */
