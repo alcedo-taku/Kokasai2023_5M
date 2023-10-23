@@ -3,8 +3,11 @@
 
 #include <array>
 #include <cstdint>
+//#include "ArmoredTrain.hpp"
 
-constexpr uint64_t TARGET_XBee_ADDRESS = 0x0013A2004198443F; // 運転段階用
+//constexpr uint8_t MAIN_ADDRESS = 01;
+//constexpr uint8_t ACTR_ADDRESS = 02;
+//constexpr uint64_t TARGET_XBee_ADDRESS = 0x0013A2004198443F; // 運転段階用
 
 /** 便利な構造体 **/
 struct GPIO_pin {
@@ -20,7 +23,7 @@ struct GPIO_pin {
  * controller → main の通信データ
  */
 struct DataFromCtrlToMain{
-	uint8_t debug_count = 0;
+
 };
 
 /**
@@ -60,8 +63,7 @@ struct DataFromCtrlToUnit{
  * unitbase → controller の通信データ
  */
 struct DataFromUnitToCtrl{
-	uint8_t debug_count = 0;
-	uint8_t lock_on; 		//!< 右から1bit目:locked, 2bit目:lock
+	uint8_t lock_on; //!< 右から 1bit目:locking, 2bit目:locked
 };
 
 /**
@@ -69,7 +71,8 @@ struct DataFromUnitToCtrl{
  */
 struct DataFromUnitToUnit{
 	uint8_t debug_count = 0;
-	uint8_t lock_on; 		//!< 右から1bit目:なし, 2bit目:lock
+	uint8_t lock_on; //!< 1bit目:locked, 2bit目:lock
+
 };
 
 /**

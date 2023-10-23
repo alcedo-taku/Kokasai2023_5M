@@ -10,3 +10,6 @@
 [submodule "PWM_Sound"]
 	path = PWM_Sound
 	url = https://gitlab.com/grcc/library/pwm-sound.git
+[submodule "Automatic_Control_Assistant"]
+	path = Automatic_Control_Assistant
+	url = https://gitlab.com/grcc/library/automatic_control_assistant.git
