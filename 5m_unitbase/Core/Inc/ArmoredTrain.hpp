@@ -52,7 +52,7 @@ struct FieldData{
 	static constexpr float opposing_distance = 0.5;	//<! 対向距離()[m]
 	static constexpr float rail_length = 2;			//<! 横移動可能長さ
 	static constexpr float gravity = 9.8;			//<! 重力加速度
-}field_data;
+};
 
 /**
  * ロボット上の的の位置を格納する構造体
@@ -74,7 +74,7 @@ struct RobotStaticData {
 			{0.01, 0.01, 12},
 	}};
 	static constexpr float time_lug1 = 0.5;				//<! 射出までにかかる時間[s]
-}robot_static_data;
+};
 
 /**
  * 自分からの相対座標系での敵の的の角度

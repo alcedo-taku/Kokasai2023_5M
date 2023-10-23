@@ -6,6 +6,7 @@
  */
 
 #include "ArmoredTrain.hpp"
+//#include "data_type.hpp"
 
 namespace at {
 
@@ -34,16 +35,16 @@ void ArmoredTrain:: convert_to_SI(RobotSensorData& sensor_data, RobotMovementDat
  * 砲弾の絶対座標系での初速度を計算する関数
  */
 void ArmoredTrain::calc_initial_velocity(RobotMovementData& movement_data, BulletVelocity& bullet_velocity) {
-	float abs_bullet_velocity = robot_static_data.radius_of_roller * movement_data.roller_rotation;
-	constexpr float cos_depression = std::cos(robot_static_data.angle_of_depression);
-	constexpr float sin_depression = std::sin(robot_static_data.angle_of_depression);
+	float abs_bullet_velocity = RobotStaticData::radius_of_roller * movement_data.roller_rotation;
+	constexpr float cos_depression = std::cos(RobotStaticData::angle_of_depression);
+	constexpr float sin_depression = std::sin(RobotStaticData::angle_of_depression);
 	float cos_turret = std::cos(movement_data.angle_of_turret + M_PI_2);
 	float sin_turret = std::sin(movement_data.angle_of_turret + M_PI_2);
 	bullet_velocity.x = abs_bullet_velocity * cos_depression * cos_turret
 						+ movement_data.velocity
-						- robot_static_data.turret_length * movement_data.roller_rotation * sin_turret;
+						- RobotStaticData::turret_length * movement_data.roller_rotation * sin_turret;
 	bullet_velocity.y = abs_bullet_velocity * cos_depression * sin_turret
-						+ robot_static_data.turret_length * movement_data.roller_rotation * cos_turret;
+						+ RobotStaticData::turret_length * movement_data.roller_rotation * cos_turret;
 	bullet_velocity.z = abs_bullet_velocity * sin_depression;
 }
 
@@ -74,15 +75,15 @@ void ArmoredTrain::calc_pos_fut(RobotMovementData& movement_data_now, RobotMovem
  */
 void ArmoredTrain::calc_shot(RobotMovementDataSet& movement_data, ShotData& shot_data){
 	// 2台間の距離を計算
-	float x = movement_data.myself.position + movement_data.enemy.position - field_data.rail_length;
-	float y = field_data.opposing_distance;
+	float x = movement_data.myself.position + movement_data.enemy.position - FieldData::rail_length;
+	float y = FieldData::opposing_distance;
 	shot_data.l = std::sqrt(x*x + y*y);
 	// どの速度なら届くかを計算
-	constexpr float cos_depression = std::cos(robot_static_data.angle_of_depression);
-	constexpr float sin_depression = std::sin(robot_static_data.angle_of_depression);
-	shot_data.v0 = std::sqrt( (shot_data.l*field_data.gravity) / (2*sin_depression*cos_depression) );
+	constexpr float cos_depression = std::cos(RobotStaticData::angle_of_depression);
+	constexpr float sin_depression = std::sin(RobotStaticData::angle_of_depression);
+	shot_data.v0 = std::sqrt( (shot_data.l*FieldData::gravity) / (2*sin_depression*cos_depression) );
 	// その速度でどのくらいの時間がかかるか計算
-	shot_data.time = 2*shot_data.v0*sin_depression/field_data.gravity;
+	shot_data.time = 2*shot_data.v0*sin_depression/FieldData::gravity;
 }
 
 /**
@@ -93,8 +94,8 @@ void ArmoredTrain::calc_shot(RobotMovementDataSet& movement_data, ShotData& shot
 void ArmoredTrain::calc_pos_of_mato(RobotMovementDataSet& movement_data, std::array<TargetPositionR, 3>& mato){
 	for (uint8_t i = 0; i < 3; i++) {
 		// 砲塔についていないターゲット
-		float x = movement_data.myself.position + movement_data.enemy.position - field_data.rail_length + robot_static_data.mato[i].x;
-		float y = field_data.opposing_distance - robot_static_data.mato[i].y;
+		float x = movement_data.myself.position + movement_data.enemy.position - FieldData::rail_length + RobotStaticData::mato[i].x;
+		float y = FieldData::opposing_distance - RobotStaticData::mato[i].y;
 		mato[i].l = std::sqrt(x*x + y*y);
 		mato[i].angle = std::atan2(x, y);
 	}
@@ -113,7 +114,7 @@ uint8_t ArmoredTrain:: judge_mato(std::array<TargetPositionR, 3>& mato, float& a
 	float evaluation_value = 100000;
 	constexpr float ratio = 0.7;
 	for (uint8_t i = 0; i < 3; i++) {
-		pos_e = std::pow(angle_of_shot - robot_static_data.mato[i].angle, 2);
+		pos_e = std::pow(angle_of_shot - RobotStaticData::mato[i].angle, 2);
 		ang_e = std::pow(angle_of_shot - mato[i].angle, 2);
 		float this_evaluation_value = pos_e * ratio + ang_e * (1-ratio);
 		if (this_evaluation_value < evaluation_value) {
@@ -216,14 +217,14 @@ void ArmoredTrain::update(InputData& input_data, OutputData& output_data) {
 	/* 未来の位置、および的への角度を計算 */
 //	ここから
 	// 射出時にいる位置を計算
-	calc_pos_fut(now.myself, future.myself, robot_static_data.time_lug1);
-	calc_pos_fut(now.enemy, future.enemy, robot_static_data.time_lug1);
+	calc_pos_fut(now.myself, future.myself, RobotStaticData::time_lug1);
+	calc_pos_fut(now.enemy, future.enemy, RobotStaticData::time_lug1);
 	future0_myself = future.myself;
 	// 射出に必要な情報(飛翔時間等)を計算
 	calc_shot(future, shot_data);
 	// 未来の位置を計算
-	calc_pos_fut(now.myself, future.myself, shot_data.time + robot_static_data.time_lug1);
-	calc_pos_fut(now.enemy, future.enemy, shot_data.time + robot_static_data.time_lug1);
+	calc_pos_fut(now.myself, future.myself, shot_data.time + RobotStaticData::time_lug1);
+	calc_pos_fut(now.enemy, future.enemy, shot_data.time + RobotStaticData::time_lug1);
 	// 射出に必要な情報(飛翔時間等)を再計算
 	// 未来の位置を再計算
 //	ここまでの計算mainでやってもいいのでは？　ま、一旦そのままでやるけど

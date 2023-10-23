@@ -256,7 +256,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 				}else if (ctrl_num == 1){
 					can.setId(CAN_ID_STD, can_id.ctrl1_to_main);
 				}
-				data_to_main.debug_count++;
 				can_state = can.transmit(sizeof(data_to_main), (uint8_t*)&data_to_main);
 				can_transmit_count++;
 				break;

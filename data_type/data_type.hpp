@@ -3,7 +3,8 @@
 
 #include <array>
 #include <cstdint>
-//#include "ArmoredTrain.hpp"
+//#include "main.h"
+#include "ArmoredTrain.hpp"
 
 //constexpr uint8_t MAIN_ADDRESS = 01;
 //constexpr uint8_t ACTR_ADDRESS = 02;
@@ -72,7 +73,7 @@ struct DataFromUnitToCtrl{
 struct DataFromUnitToUnit{
 	uint8_t debug_count = 0;
 	uint8_t lock_on; //!< 1bit目:locked, 2bit目:lock
-
+	at::RobotSensorData robot_sensor;
 };
 
 /**

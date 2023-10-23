@@ -19,6 +19,7 @@
 #include "mcp3208.hpp"
 #include <array>
 #include <string.h>
+#include "ArmoredTrain.hpp"
 #include "data_type.hpp"
 /* Include End */
 
@@ -34,6 +35,7 @@
 
 /* Variable Begin */
 uint8_t unit_num = 0;
+//at::ArmoredTrain armored_train();
 
 // モータ
 std::array<halex::Motor, 4> motor = {
@@ -205,6 +207,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 				break;
 		}
 #endif
+
 	}else if(htim == &htim17){
 		/* CAN 送信 */
 		static uint8_t can_transmit_count = 0;
