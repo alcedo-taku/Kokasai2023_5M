@@ -47,7 +47,7 @@ void MX_GPIO_Init(void)
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, GPIO6_Pin|GPIO5_Pin|GPIO4_Pin|LED6_Pin
+  HAL_GPIO_WritePin(GPIOC, GPIO4_Pin|GPIO5_Pin|GPIO6_Pin|LED6_Pin
                           |LED5_Pin|LED4_Pin|LED3_Pin|LED2_Pin
                           |LED1_Pin, GPIO_PIN_RESET);
 
@@ -63,7 +63,7 @@ void MX_GPIO_Init(void)
   /*Configure GPIO pins : PCPin PCPin PCPin PCPin
                            PCPin PCPin PCPin PCPin
                            PCPin */
-  GPIO_InitStruct.Pin = GPIO6_Pin|GPIO5_Pin|GPIO4_Pin|LED6_Pin
+  GPIO_InitStruct.Pin = GPIO4_Pin|GPIO5_Pin|GPIO6_Pin|LED6_Pin
                           |LED5_Pin|LED4_Pin|LED3_Pin|LED2_Pin
                           |LED1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;

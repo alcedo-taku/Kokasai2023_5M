@@ -56,8 +56,8 @@
 
 /* External variables --------------------------------------------------------*/
 extern CAN_HandleTypeDef hcan;
+extern TIM_HandleTypeDef htim16;
 extern TIM_HandleTypeDef htim17;
-extern DMA_HandleTypeDef hdma_usart2_rx;
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -201,20 +201,6 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /**
-  * @brief This function handles DMA1 channel6 global interrupt.
-  */
-void DMA1_Channel6_IRQHandler(void)
-{
-  /* USER CODE BEGIN DMA1_Channel6_IRQn 0 */
-
-  /* USER CODE END DMA1_Channel6_IRQn 0 */
-  HAL_DMA_IRQHandler(&hdma_usart2_rx);
-  /* USER CODE BEGIN DMA1_Channel6_IRQn 1 */
-
-  /* USER CODE END DMA1_Channel6_IRQn 1 */
-}
-
-/**
   * @brief This function handles USB high priority or CAN_TX interrupts.
   */
 void USB_HP_CAN_TX_IRQHandler(void)
@@ -226,6 +212,34 @@ void USB_HP_CAN_TX_IRQHandler(void)
   /* USER CODE BEGIN USB_HP_CAN_TX_IRQn 1 */
 
   /* USER CODE END USB_HP_CAN_TX_IRQn 1 */
+}
+
+/**
+  * @brief This function handles USB low priority or CAN_RX0 interrupts.
+  */
+void USB_LP_CAN_RX0_IRQHandler(void)
+{
+  /* USER CODE BEGIN USB_LP_CAN_RX0_IRQn 0 */
+
+  /* USER CODE END USB_LP_CAN_RX0_IRQn 0 */
+  HAL_CAN_IRQHandler(&hcan);
+  /* USER CODE BEGIN USB_LP_CAN_RX0_IRQn 1 */
+
+  /* USER CODE END USB_LP_CAN_RX0_IRQn 1 */
+}
+
+/**
+  * @brief This function handles TIM1 update and TIM16 interrupts.
+  */
+void TIM1_UP_TIM16_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM1_UP_TIM16_IRQn 0 */
+
+  /* USER CODE END TIM1_UP_TIM16_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim16);
+  /* USER CODE BEGIN TIM1_UP_TIM16_IRQn 1 */
+
+  /* USER CODE END TIM1_UP_TIM16_IRQn 1 */
 }
 
 /**

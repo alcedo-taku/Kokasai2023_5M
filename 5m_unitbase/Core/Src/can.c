@@ -38,11 +38,11 @@ void MX_CAN_Init(void)
 
   /* USER CODE END CAN_Init 1 */
   hcan.Instance = CAN;
-  hcan.Init.Prescaler = 12;
+  hcan.Init.Prescaler = 3;
   hcan.Init.Mode = CAN_MODE_NORMAL;
   hcan.Init.SyncJumpWidth = CAN_SJW_1TQ;
-  hcan.Init.TimeSeg1 = CAN_BS1_15TQ;
-  hcan.Init.TimeSeg2 = CAN_BS2_4TQ;
+  hcan.Init.TimeSeg1 = CAN_BS1_7TQ;
+  hcan.Init.TimeSeg2 = CAN_BS2_2TQ;
   hcan.Init.TimeTriggeredMode = DISABLE;
   hcan.Init.AutoBusOff = ENABLE;
   hcan.Init.AutoWakeUp = DISABLE;
@@ -84,6 +84,8 @@ void HAL_CAN_MspInit(CAN_HandleTypeDef* canHandle)
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
     /* CAN interrupt Init */
+    HAL_NVIC_SetPriority(USB_HP_CAN_TX_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(USB_HP_CAN_TX_IRQn);
     HAL_NVIC_SetPriority(USB_LP_CAN_RX0_IRQn, 0, 0);
     HAL_NVIC_EnableIRQ(USB_LP_CAN_RX0_IRQn);
   /* USER CODE BEGIN CAN_MspInit 1 */
@@ -110,6 +112,7 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* canHandle)
     HAL_GPIO_DeInit(GPIOB, GPIO_PIN_8|GPIO_PIN_9);
 
     /* CAN interrupt Deinit */
+    HAL_NVIC_DisableIRQ(USB_HP_CAN_TX_IRQn);
     HAL_NVIC_DisableIRQ(USB_LP_CAN_RX0_IRQn);
   /* USER CODE BEGIN CAN_MspDeInit 1 */
 

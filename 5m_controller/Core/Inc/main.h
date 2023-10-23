@@ -58,16 +58,6 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define PF6_Pin GPIO_PIN_13
-#define PF6_GPIO_Port GPIOC
-#define PA8_Pin GPIO_PIN_14
-#define PA8_GPIO_Port GPIOC
-#define PD8_Pin GPIO_PIN_15
-#define PD8_GPIO_Port GPIOC
-#define PB15_Pin GPIO_PIN_0
-#define PB15_GPIO_Port GPIOF
-#define PB14_Pin GPIO_PIN_1
-#define PB14_GPIO_Port GPIOF
 #define joystick_1A_Pin GPIO_PIN_0
 #define joystick_1A_GPIO_Port GPIOA
 #define joystick_1B_Pin GPIO_PIN_1
@@ -76,32 +66,22 @@ void Error_Handler(void);
 #define joystick_2A_GPIO_Port GPIOA
 #define joystick_2B_Pin GPIO_PIN_3
 #define joystick_2B_GPIO_Port GPIOA
-#define PA4_Pin GPIO_PIN_4
-#define PA4_GPIO_Port GPIOA
-#define PA5_Pin GPIO_PIN_5
-#define PA5_GPIO_Port GPIOA
-#define External_LED_1_Pin GPIO_PIN_6
-#define External_LED_1_GPIO_Port GPIOA
 #define LED_R_D_Pin GPIO_PIN_0
 #define LED_R_D_GPIO_Port GPIOB
 #define LED_R_L_Pin GPIO_PIN_1
 #define LED_R_L_GPIO_Port GPIOB
-#define PB2_Pin GPIO_PIN_2
-#define PB2_GPIO_Port GPIOB
-#define External_LED_2_Pin GPIO_PIN_8
-#define External_LED_2_GPIO_Port GPIOE
-#define PE9_Pin GPIO_PIN_9
-#define PE9_GPIO_Port GPIOE
-#define radio_Pin GPIO_PIN_14
-#define radio_GPIO_Port GPIOB
+#define LED_0_Pin GPIO_PIN_14
+#define LED_0_GPIO_Port GPIOB
+#define LED_1_Pin GPIO_PIN_15
+#define LED_1_GPIO_Port GPIOB
+#define LED_2_Pin GPIO_PIN_8
+#define LED_2_GPIO_Port GPIOD
+#define LED_3_Pin GPIO_PIN_8
+#define LED_3_GPIO_Port GPIOA
 #define LED_L_D_Pin GPIO_PIN_9
 #define LED_L_D_GPIO_Port GPIOA
 #define LED_L_L_Pin GPIO_PIN_10
 #define LED_L_L_GPIO_Port GPIOA
-#define PF7_Pin GPIO_PIN_6
-#define PF7_GPIO_Port GPIOF
-#define PC13_Pin GPIO_PIN_7
-#define PC13_GPIO_Port GPIOF
 #define LED_L_U_Pin GPIO_PIN_15
 #define LED_L_U_GPIO_Port GPIOA
 #define LED_L_R_Pin GPIO_PIN_3

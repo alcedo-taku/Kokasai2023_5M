@@ -9,6 +9,16 @@
 //constexpr uint8_t ACTR_ADDRESS = 02;
 //constexpr uint64_t TARGET_XBee_ADDRESS = 0x0013A2004198443F; // 運転段階用
 
+/** 便利な構造体 **/
+struct GPIO_pin {
+    GPIO_TypeDef* GPIOx;
+    uint16_t GPIO_Pin;
+};
+/** 便利な構造体 **/
+
+
+/** 通信 **/
+
 /**
  * controller → main の通信データ
  */
@@ -20,7 +30,7 @@ struct DataFromCtrlToMain{
  * main → controller の通信データ
  */
 struct DataFromMainToCtrl{
-
+	uint8_t debug_count = 0;
 };
 
 /**
@@ -28,20 +38,22 @@ struct DataFromMainToCtrl{
  */
 struct DataFromMainToUnit{
 	uint8_t debug_count = 0;
-
+	uint8_t is_moving_time = 0; //!< 右から1bit目:可否, 2bit目:ready
 };
 
 /**
  * unitbase → main の通信データ
  */
 struct DataFromUnitToMain{
-	uint8_t hit_points; //!< 右3bitを使って0,1で格納
+	uint8_t debug_count = 0;
+	uint8_t hit_points; 	//!< 右3bitを使って0,1で格納
 };
 
 /**
  * controller →　unitbase の通信データ
  */
 struct DataFromCtrlToUnit{
+	uint8_t debug_count = 0;
 	int16_t left_handle;
 	int16_t right_handle;
 	bool is_pulled_trigger;
@@ -55,7 +67,7 @@ struct DataFromUnitToCtrl{
 };
 
 /**
- * unitbase → unitbase のデータ
+ * unitbase → unitbase の通信データ
  */
 struct DataFromUnitToUnit{
 	uint8_t debug_count = 0;
@@ -67,15 +79,25 @@ struct DataFromUnitToUnit{
  * can data の id
  */
 struct CanId{
-	uint32_t main_to_unit	= 0x1;
-	uint32_t main_to_ctrl	= 0x2;
-	uint32_t ctrl1_to_main  = 0x3;
-	uint32_t ctrl2_to_main  = 0x4;
-	uint32_t unit1_to_main  = 0x5;
-	uint32_t unit2_to_main  = 0x6;
-	uint32_t unit0_to_unit1 = 0x7;
-	uint32_t unit1_to_unit0 = 0x8;
+	// unit to unit
+	static constexpr uint32_t unit0_to_unit1 = 0x100;
+	static constexpr uint32_t unit1_to_unit0 = 0x101;
+	// main to
+	static constexpr uint32_t main_to_unit	= 0x113;
+	static constexpr uint32_t main_to_ctrl	= 0x114; // 不要
+	// to main
+	static constexpr uint32_t ctrl0_to_main  = 0x103; // 不要
+	static constexpr uint32_t ctrl1_to_main  = 0x104; // 不要
+	static constexpr uint32_t unit0_to_main  = 0x105;
+	static constexpr uint32_t unit1_to_main  = 0x106;
+	// unit - ctrl
+	static constexpr uint32_t ctrl0_to_unit0 = 0x109;
+	static constexpr uint32_t ctrl1_to_unit1 = 0x110;
+	static constexpr uint32_t unit0_to_ctrl0 = 0x111;
+	static constexpr uint32_t unit1_to_ctrl1 = 0x112;
 }can_id;
+
+/** 通信 **/
 
 
 #endif /* DATA_TYPE */
