@@ -43,6 +43,11 @@
 			<location>C:/user_file/STM32CubeIDE_workspase/2023/kokasai2023_5m/HAL_Extension</location>
 		</link>
 		<link>
+			<name>PWM_Sound</name>
+			<type>2</type>
+			<location>C:/user_file/STM32CubeIDE_workspase/2023/kokasai2023_5m/PWM_Sound</location>
+		</link>
+		<link>
 			<name>data_type</name>
 			<type>2</type>
 			<location>C:/user_file/STM32CubeIDE_workspase/2023/kokasai2023_5m/data_type</location>
