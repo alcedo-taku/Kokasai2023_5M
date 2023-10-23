@@ -23,7 +23,7 @@
 /* Include End */
 
 /* Define Begin */
-#define IS_MOTOR_TEST 1
+#define IS_MOTOR_TEST 0
 /* Define End */
 
 /* Enum Begin */
@@ -139,7 +139,8 @@ void init(void){
 
 
 	// タイマー割込み
-	HAL_TIM_Base_Start_IT(&htim7);
+	HAL_TIM_Base_Start_IT(&htim16); // メイン処理用
+	HAL_TIM_Base_Start_IT(&htim17); // 通信用
 
 	HAL_GPIO_WritePin(GPIO6_GPIO_Port, GPIO6_Pin, GPIO_PIN_RESET);
 
@@ -167,7 +168,7 @@ uint16_t experiment_timer;
 /* Function Body Begin */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 	//割り込みの処理内容
-	if(htim == &htim7){
+	if(htim == &htim16){
 #if IS_MOTOR_TEST
 		// MD実験用
 //		static uint16_t experiment_timer;
@@ -204,7 +205,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 				break;
 		}
 #endif
-
+	}else if(htim == &htim17){
 		/* CAN 送信 */
 		static uint8_t can_transmit_count = 0;
 		switch(can_transmit_count){
@@ -237,7 +238,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 				}else if (unit_num == 1){
 					can.setId(CAN_ID_STD, can_id.unit1_to_ctrl1);
 				}
-				data_to_ctrl.debug_count++;
 				can_state = can.transmit(sizeof(data_to_ctrl), (uint8_t*)&data_to_ctrl);
 				can_transmit_count = 0; // ラストは0にする
 				break;

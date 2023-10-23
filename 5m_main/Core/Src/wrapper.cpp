@@ -95,7 +95,8 @@ void init(void){
 	HAL_CAN_TxMailbox0CompleteCallback(&hcan);							// 送信できたかの確認の割り込み　HAL_CAN_TxMailbox0CompleteCallback
 
 	// タイマー割込み
-	HAL_TIM_Base_Start_IT(&htim17);
+	HAL_TIM_Base_Start_IT(&htim16); // メイン処理用
+	HAL_TIM_Base_Start_IT(&htim17); // 通信用
 
 	for (uint8_t i = 0; i < 10; ++i) {
 		HAL_GPIO_WritePin(LED[i].GPIOx, LED[i].GPIO_Pin, GPIO_PIN_SET);
@@ -125,7 +126,7 @@ void HAL_CAN_TxMailbox1CompleteCallback(CAN_HandleTypeDef *hcan){
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 	//　割り込みの処理内容
-	if(htim == &htim17){
+	if(htim == &htim16){
 		static uint16_t experiment_timer;
 		experiment_timer++;
 		switch (experiment_timer) {
@@ -134,18 +135,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 				break;
 			case 2000:
 				HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_RESET);
-				break;
-			case 3000:
-				HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_SET);
-				break;
-			case 4000:
-				HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_RESET);
 				experiment_timer = 0;
 				break;
 			default:
 				break;
 		}
-
+	}else if(htim == &htim17){
 		// CAN送信
 		static uint8_t can_transmit_count = 0;
 		switch(can_transmit_count){
