@@ -4,7 +4,6 @@
 #include <array>
 #include <cstdint>
 #include "main.h"
-#include "ArmoredTrain.hpp"
 
 //constexpr uint8_t MAIN_ADDRESS = 01;
 //constexpr uint8_t ACTR_ADDRESS = 02;
@@ -116,7 +115,8 @@ struct CanId{
 	static constexpr uint32_t ctrl1_to_unit1 = 0x110;
 	static constexpr uint32_t unit0_to_ctrl0 = 0x111;
 	static constexpr uint32_t unit1_to_ctrl1 = 0x112;
-}can_id;
+};
+//CanId can_id;
 
 /** 通信 **/
 

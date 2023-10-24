@@ -175,11 +175,11 @@ void init(void){
 	can.setFilterBank(14); // どこまでのバンクを使うか
 	can.setStoreRxFifo(CAN_RX_FIFO0); // 使うFIFOメモリ＿
 	if (ctrl_num == 0) {
-//		can.setFourTypePathId(400, can_id.unit0_to_ctrl0, 200, 100);
-		can.setFourTypePathId(can_id.main_to_ctrl, can_id.unit0_to_ctrl0, 200, 100);
+//		can.setFourTypePathId(400, CanId::unit0_to_ctrl0, 200, 100);
+		can.setFourTypePathId(CanId::main_to_ctrl, CanId::unit0_to_ctrl0, 200, 100);
 	}else if (ctrl_num == 1){
-//		can.setFourTypePathId(400, can_id.unit1_to_ctrl1, 200, 100);
-		can.setFourTypePathId(can_id.main_to_ctrl, can_id.unit1_to_ctrl1, 200, 100);
+//		can.setFourTypePathId(400, CanId::unit1_to_ctrl1, 200, 100);
+		can.setFourTypePathId(CanId::main_to_ctrl, CanId::unit1_to_ctrl1, 200, 100);
 	}
 	can.setFilterConfig(); // フィルターの設定を反映する
 	HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING); // 受信割り込みの有効化
@@ -209,9 +209,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		data_t data;
 		readSW(data.sw);
 		readJoystick(data.joystick);
-		data_to_unit.right_handle = data.joystick[0];
-		data_to_unit.left_handle = data.joystick[1];
-		data_to_unit.is_pulled_trigger = !HAL_GPIO_ReadPin(gpio_pin[11].GPIOx, gpio_pin[11].GPIO_Pin);
+		data_to_unit.ctrl_data.right_handle = data.joystick[0];
+		data_to_unit.ctrl_data.left_handle = data.joystick[1];
+		data_to_unit.ctrl_data.is_pulled_trigger = !HAL_GPIO_ReadPin(gpio_pin[11].GPIOx, gpio_pin[11].GPIO_Pin);
 
 		pwm_sounds.start_sounds();
 		pwm_sounds.update_sounds();
@@ -248,9 +248,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 			case 0:
 				// to unit
 				if (ctrl_num == 0) {
-					can.setId(CAN_ID_STD, can_id.ctrl0_to_unit0);
+					can.setId(CAN_ID_STD, CanId::ctrl0_to_unit0);
 				}else if (ctrl_num == 1){
-					can.setId(CAN_ID_STD, can_id.ctrl1_to_unit1);
+					can.setId(CAN_ID_STD, CanId::ctrl1_to_unit1);
 				}
 				data_to_unit.debug_count++;
 				can_state = can.transmit(sizeof(data_to_unit), (uint8_t*)&data_to_unit);
@@ -259,9 +259,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 			case 1:
 				// to main
 				if (ctrl_num == 0) {
-					can.setId(CAN_ID_STD, can_id.ctrl0_to_main);
+					can.setId(CAN_ID_STD, CanId::ctrl0_to_main);
 				}else if (ctrl_num == 1){
-					can.setId(CAN_ID_STD, can_id.ctrl1_to_main);
+					can.setId(CAN_ID_STD, CanId::ctrl1_to_main);
 				}
 				can_state = can.transmit(sizeof(data_to_main), (uint8_t*)&data_to_main);
 				can_transmit_count++;
@@ -313,13 +313,13 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan){
 //		disconnect_count = 0;
 		switch (can.getRxId()) {
 			// from main
-			case can_id.main_to_ctrl:
+			case CanId::main_to_ctrl:
 				memcpy(&data_from_main, &buf, sizeof(data_from_main));
 				break;
 
 			// from unit
-			case can_id.unit0_to_ctrl0:
-			case can_id.unit1_to_ctrl1:
+			case CanId::unit0_to_ctrl0:
+			case CanId::unit1_to_ctrl1:
 				memcpy(&data_from_unit,&buf,sizeof(data_from_unit));
 				break;
 		}

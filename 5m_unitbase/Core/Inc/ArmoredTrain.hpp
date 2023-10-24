@@ -61,6 +61,7 @@ struct RobotStaticData {
 	}};
 	static constexpr float time_lug1 = 0.5;				//<! 射出までにかかる時間[s]
 };
+//RobotStaticData static_data;
 
 /**
  * 自分からの相対座標系での敵の的の角度

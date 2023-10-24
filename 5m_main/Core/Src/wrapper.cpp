@@ -86,7 +86,7 @@ void init(void){
 	can.setFilterMode(CAN_FilterMode::PATH_FOUR_TYPE_STD_ID); // 16bitID リストモード ４種類のIDが追加可能
 	can.setFilterBank(14); // どこまでのバンクを使うか
 	can.setStoreRxFifo(CAN_RX_FIFO0); // 使うFIFOメモリ＿
-	can.setFourTypePathId(can_id.unit0_to_main, can_id.unit1_to_main, can_id.ctrl0_to_main, can_id.ctrl1_to_main); // to main のメッセージid
+	can.setFourTypePathId(CanId::unit0_to_main, CanId::unit1_to_main, CanId::ctrl0_to_main, CanId::ctrl1_to_main); // to main のメッセージid
 	can.setFilterConfig(); // フィルターの設定を反映する
 	HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING); // 受信割り込みの有効化
 	// 送信設定
@@ -146,7 +146,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		switch(can_transmit_count){
 			case 0:
 				// to unit
-				can.setId(CAN_ID_STD, can_id.main_to_unit);
+				can.setId(CAN_ID_STD, CanId::main_to_unit);
 				data_to_unit.debug_count++;
 				can_state = can.transmit(sizeof(data_to_unit), (uint8_t*)&data_to_unit);
 				can_state_ = can.getState();
@@ -155,7 +155,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 				break;
 			case 1:
 				// to controller
-				can.setId(CAN_ID_STD, can_id.main_to_ctrl);
+				can.setId(CAN_ID_STD, CanId::main_to_ctrl);
 				data_to_ctrl.debug_count++;
 				can_state = can.transmit(sizeof(data_to_ctrl), (uint8_t*)&data_to_ctrl);
 				can_state_ = can.getState();
@@ -179,18 +179,18 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan){
 //		disconnect_count = 0;
 		switch (can.getRxId()) {
 			// from unit
-			case can_id.unit0_to_main:
+			case CanId::unit0_to_main:
 				memcpy(&data_from_unit,&buf,sizeof(data_from_unit));
 				break;
-			case can_id.unit1_to_main:
+			case CanId::unit1_to_main:
 				memcpy(&data_from_unit1, &buf, sizeof(data_from_unit1));
 				break;
 
 			// from controller
-			case can_id.ctrl0_to_main:
+			case CanId::ctrl0_to_main:
 				memcpy(&data_from_ctrl0, &buf, sizeof(data_from_ctrl0));
 				break;
-			case can_id.ctrl1_to_main:
+			case CanId::ctrl1_to_main:
 				memcpy(&data_from_ctrl1, &buf, sizeof(data_from_ctrl1));
 				break;
 		}
