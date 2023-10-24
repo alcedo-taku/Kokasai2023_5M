@@ -4,6 +4,9 @@
  * 1:受信成功中は点滅
  * 2:送信処理中は点灯
  * 3:送信のタイマー割り込みで点滅
+ *
+ * GPIO
+ * 宣言部に記載
  */
 
 #include "wrapper.hpp"
@@ -65,19 +68,19 @@ constexpr std::array<GPIO_pin,4> led_pin = {{
 }};
 constexpr std::array<GPIO_pin,13> gpio_pin = {{
 	// 回路上の印字と実際の配線が異なるので注意
-	{GPIOA, GPIO_PIN_4},	// pwm スピーカー
-	{GPIOA, GPIO_PIN_5},
-	{GPIOA, GPIO_PIN_6},
-	{GPIOB, GPIO_PIN_2},
-	{GPIOE, GPIO_PIN_8},	// out lock on
-	{GPIOE, GPIO_PIN_9},	// out locked on
-	{GPIOF, GPIO_PIN_1},	// out 的0 LED
-	{GPIOF, GPIO_PIN_0},	// out 的1　LED
-	{GPIOC, GPIO_PIN_15},	// out 的2 LED
-	{GPIOC, GPIO_PIN_14},	// in
-	{GPIOC, GPIO_PIN_13},	// in
-	{GPIOF, GPIO_PIN_6},	// in トリガー
-	{GPIOF, GPIO_PIN_7}		// in コントローラの番号を決める
+	{GPIOA, GPIO_PIN_4},	//  0:pwm スピーカー
+	{GPIOA, GPIO_PIN_5},	//  1:
+	{GPIOA, GPIO_PIN_6},	//  2:
+	{GPIOB, GPIO_PIN_2},	//  3:
+	{GPIOE, GPIO_PIN_8},	//  4:out lock on
+	{GPIOE, GPIO_PIN_9},	//  5:out locked on
+	{GPIOF, GPIO_PIN_1},	//  6:out 的0 LED
+	{GPIOF, GPIO_PIN_0},	//  7:out 的1　LED
+	{GPIOC, GPIO_PIN_15},	//  8:out 的2 LED
+	{GPIOC, GPIO_PIN_14},	//  9:in
+	{GPIOC, GPIO_PIN_13},	// 10:in
+	{GPIOF, GPIO_PIN_6},	// 11:in トリガー
+	{GPIOF, GPIO_PIN_7}		// 12:in コントローラの番号を決める
 }};
 Music music_start[6]     = { {SoundScale::E4, 250}, {SoundScale::R, 750}, {SoundScale::E4, 250}, {SoundScale::R, 750}, {SoundScale::E5, 1000}, {SoundScale::R, 2000},  }; // 音階と各音の時間を指定
 Music music_locked_on[2] = { {SoundScale::E2, 1600}, {SoundScale::R, 500} };
@@ -206,6 +209,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		data_t data;
 		readSW(data.sw);
 		readJoystick(data.joystick);
+		data_to_unit.right_handle = data.joystick[0];
+		data_to_unit.left_handle = data.joystick[1];
+		data_to_unit.is_pulled_trigger = !HAL_GPIO_ReadPin(gpio_pin[11].GPIOx, gpio_pin[11].GPIO_Pin);
+
 		pwm_sounds.start_sounds();
 		pwm_sounds.update_sounds();
 		HAL_GPIO_WritePin(led_pin[2].GPIOx, led_pin[2].GPIO_Pin, GPIO_PIN_SET);
@@ -331,7 +338,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan){
 
 void readSW(uint8_t &data){
 	data = 0;
-	for(uint8_t n=0; n<13; n++){
+	for(uint8_t n=0; n<13; n++){ // todo これだめじゃね？13大杉
 		data |= (uint16_t)HAL_GPIO_ReadPin(gpio_pin[n].GPIOx, gpio_pin[n].GPIO_Pin) << n;
 	}
 }
