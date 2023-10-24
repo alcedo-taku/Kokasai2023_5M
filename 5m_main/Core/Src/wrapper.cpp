@@ -60,7 +60,7 @@ uint16_t rx0_callback_count = 0;
 uint16_t transmit_frequency = 300; //データの更新周波数
 uint8_t number_of_id = 8;
 DataFromMainToUnit data_to_unit;
-DataFromUnitToMain data_from_unit0;
+DataFromUnitToMain data_from_unit;
 DataFromUnitToMain data_from_unit1;
 DataFromMainToCtrl data_to_ctrl;
 DataFromCtrlToMain data_from_ctrl0;
@@ -180,7 +180,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan){
 		switch (can.getRxId()) {
 			// from unit
 			case can_id.unit0_to_main:
-				memcpy(&data_from_unit0,&buf,sizeof(data_from_unit0));
+				memcpy(&data_from_unit,&buf,sizeof(data_from_unit));
 				break;
 			case can_id.unit1_to_main:
 				memcpy(&data_from_unit1, &buf, sizeof(data_from_unit1));
