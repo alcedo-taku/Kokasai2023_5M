@@ -6,7 +6,6 @@
  */
 
 #include "ArmoredTrain.hpp"
-//#include "data_type.hpp"
 
 namespace at {
 
@@ -22,8 +21,8 @@ ArmoredTrain::ArmoredTrain() {
  * @param sensor_data
  * @param movement_data
  */
-void ArmoredTrain:: convert_to_SI(RobotSensorData& sensor_data, RobotMovementData& movement_data) {
-	static RobotSensorData prev_sensor_data;
+void ArmoredTrain:: convert_to_SI(SensorData& sensor_data, RobotMovementData& movement_data) {
+	static SensorData prev_sensor_data;
 	movement_data.angle_of_turret			 = sensor_data.pot_angle_of_turret * 0.01;
 	movement_data.position					 = sensor_data.enc_position * 0.1;
 	movement_data.angular_velocity_of_truret = (sensor_data.pot_angle_of_turret	 - prev_sensor_data.pot_angle_of_turret	) * 0.01 * frequency;
@@ -187,6 +186,7 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 		}
 	}
 	// compare 加速度調整
+//	todo
 
 	/* LED等 */
 	if (mato_num < 3) {

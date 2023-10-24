@@ -1,5 +1,6 @@
 /**
  * 回路の印字は相変わらず間違っている
+ *
  * GPIO
  * ピン配置：文字を読む方から見て上から順に0-5と番号を振った
  * 0:そのunitbaseの番号を決める、ジャンパーあり→0, なし→1
@@ -7,6 +8,10 @@
  * LED
  * PD1			:タイマー割り込み
  * PC15(GPIO6)	:受信成功時点滅
+ *
+ * Encoder
+ * 0(tim2) :射出
+ * 1(tim3) :位置
  */
 #include "wrapper.hpp"
 
@@ -20,7 +25,7 @@
 #include <array>
 #include <string.h>
 #include "ArmoredTrain.hpp"
-#include "data_type.hpp"
+//#include "data_type.hpp"
 /* Include End */
 
 /* Define Begin */
@@ -35,7 +40,11 @@
 
 /* Variable Begin */
 uint8_t unit_num = 0;
-//at::ArmoredTrain armored_train();
+at::ArmoredTrain armored_train;
+at::InputData input_data;
+at::OutputData output_data;
+SensorData sensor_data;
+
 
 // モータ
 std::array<halex::Motor, 4> motor = {
@@ -71,7 +80,7 @@ HAL_CAN_StateTypeDef can_state_;
 uint16_t rx0_callback_count = 0;
 uint16_t transmit_frequency = 300; //データの更新周波数
 uint8_t number_of_id = 8;
-DataFromUnitToUnit data_from_unit0;
+DataFromUnitToUnit data_from_unit;
 DataFromUnitToUnit data_to_unit;
 DataFromMainToUnit data_from_main;
 DataFromUnitToMain data_to_main;
@@ -154,15 +163,6 @@ void loop(void){
 //	uint16_t adc_value;
 //	mcp3208_reader.update(mcp3208::Channel::CH_0, 0xF);
 //	adc_value_array[0] = mcp3208_reader.get(mcp3208::Channel::CH_0);
-
-	mcp3208_reader.update(0xF);
-	adc_value_array = mcp3208_reader.get();
-
-	for (uint8_t i = 0; i < 2; i++) {
-		encoder[i].update();
-		encoder_count[i] = encoder[i].getCount();
-	}
-
 }
 
 uint16_t experiment_timer;
@@ -207,6 +207,38 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 				break;
 		}
 #endif
+
+		/* コントローラからの値の代入 */
+		input_data.ctrl = data_from_ctrl.ctrl_data;
+
+
+		/* センサーの値の代入 */
+		// adc
+		mcp3208_reader.update(0xF);
+//		adc_value_array = mcp3208_reader.get();
+		for(uint8_t i = 0; i < 4; i++){
+			adc_value_array[i] = mcp3208_reader.get( (mcp3208::Channel)i );
+		}
+		// encoder
+		for (uint8_t i = 0; i < 2; i++) {
+			encoder[i].update();
+			encoder_count[i] = encoder[i].getCount();
+		}
+		// 代入
+		input_data.myself.enc_roller_rotation = encoder[0].getCount();
+		input_data.myself.enc_position = encoder[1].getCount();
+		input_data.myself.pot_angle_of_turret = adc_value_array[0];
+
+		/* 敵ロボットからの情報の代入 */
+		input_data.enemy = data_from_unit.sensor_data;
+
+		/* update & 取得 */
+		armored_train.update(input_data, output_data);
+
+		/* モータに送る */
+		for(uint8_t i=0; i < motor.size(); i++){
+			motor[i].setSpeed(output_data.compare[i]);
+		}
 
 	}else if(htim == &htim17){
 		/* CAN 送信 */
@@ -279,7 +311,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan){
 			// from unit
 			case can_id.unit1_to_unit0:
 			case can_id.unit0_to_unit1:
-				memcpy(&data_from_unit0,&buf,sizeof(data_from_unit0));
+				memcpy(&data_from_unit,&buf,sizeof(data_from_unit));
 				break;
 
 			// from controller

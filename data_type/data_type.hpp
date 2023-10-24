@@ -3,7 +3,7 @@
 
 #include <array>
 #include <cstdint>
-//#include "main.h"
+#include "main.h"
 #include "ArmoredTrain.hpp"
 
 //constexpr uint8_t MAIN_ADDRESS = 01;
@@ -16,6 +16,28 @@ struct GPIO_pin {
     uint16_t GPIO_Pin;
 };
 /** 便利な構造体 **/
+
+
+/** センサーやコントローラ **/
+
+/**
+ * センサーの生値
+ */
+struct SensorData {
+	uint16_t enc_roller_rotation;
+	int16_t enc_position;
+	uint32_t pot_angle_of_turret;
+};
+
+/**
+ * コントローラの値
+ */
+struct ControllerData{
+	int16_t left_handle;
+	int16_t right_handle;
+	bool is_pulled_trigger;
+};
+/** センサーやコントローラ **/
 
 
 /** 通信 **/
@@ -55,9 +77,7 @@ struct DataFromUnitToMain{
  */
 struct DataFromCtrlToUnit{
 	uint8_t debug_count = 0;
-	int16_t left_handle;
-	int16_t right_handle;
-	bool is_pulled_trigger;
+	ControllerData ctrl_data;
 };
 
 /**
@@ -73,7 +93,7 @@ struct DataFromUnitToCtrl{
 struct DataFromUnitToUnit{
 	uint8_t debug_count = 0;
 	uint8_t lock_on; //!< 1bit目:locked, 2bit目:lock
-	at::RobotSensorData robot_sensor;
+	SensorData sensor_data;
 };
 
 /**

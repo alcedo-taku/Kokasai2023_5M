@@ -9,30 +9,16 @@
 #define ARMOREDTRAIN_HPP_
 
 #include "Automatic_Control_Assistant.hpp"
+#include "data_type.hpp"
 
 namespace at {
-
-/**
- * センサーの生値
- */
-struct RobotSensorData {
-	uint16_t enc_roller_rotation;
-	int16_t enc_position;
-	uint32_t pot_angle_of_turret;
-};
-
-struct ControllerData{
-	int16_t left_handle;
-	int16_t right_handle;
-	bool is_pulled_trigger;
-};
 
 /**
  * このクラスに入ってくる構造体
  */
 struct InputData {
-	RobotSensorData myself;
-	RobotSensorData enemy;
+	SensorData myself;
+	SensorData enemy;
 	bool is_pusshed_lounch_reset;
 	ControllerData ctrl;
 };
@@ -134,7 +120,7 @@ private:
 	aca::PID_controller pid_angle = aca::PID_controller (pid_parameter_angle, frequency);
 	aca::PID_Element pid_parameter_roller {5,0,0};
 	aca::PID_controller pid_roller = aca::PID_controller (pid_parameter_roller, frequency);
-	void convert_to_SI(RobotSensorData& sensor_data, RobotMovementData& movement_data);
+	void convert_to_SI(SensorData& sensor_data, RobotMovementData& movement_data);
 	void calc_initial_velocity(RobotMovementData& movement_data, BulletVelocity& bullet_velocity);	//<! 砲弾の初速度を求める 運動学　いらない
 	void calc_roller_rotation();
 	void calc_pos_fut(RobotMovementData& movement_data_now, RobotMovementData movement_data_fut, uint16_t time_lug);
