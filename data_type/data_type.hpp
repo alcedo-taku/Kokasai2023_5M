@@ -23,8 +23,8 @@ struct GPIO_pin {
  * センサーの生値
  */
 struct SensorData {
-	uint16_t enc_roller_rotation;
-	int16_t enc_position;
+	uint16_t enc_roller_rotation;	//!< count(微分していない値)
+	int16_t enc_position;			//!< count(微分していない値)
 	uint32_t pot_angle_of_turret;
 };
 

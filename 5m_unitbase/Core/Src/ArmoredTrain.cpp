@@ -206,7 +206,7 @@ void ArmoredTrain::update(InputData& input_data, OutputData& output_data) {
 	RobotMovementDataSet future;
 	RobotMovementData future0_myself;
 	RobotMovementData target;
-	std::array<TargetPositionR, 3> mato;	//<! 的の位置
+	std::array<TargetPositionR, 3> mato;	//!< 的の位置
 //	InputData input_data;
 //	OutputData output_data;
 	ShotData shot_data;
