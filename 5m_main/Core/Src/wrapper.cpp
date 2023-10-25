@@ -45,6 +45,11 @@ constexpr std::array<GPIO_pin,10> GPIO = {{
 	{G9_GPIO_Port, G9_Pin},
 	{G10_GPIO_Port, G10_Pin}
 }};
+//非常停止
+constexpr std::array<GPIO_pin,2> EMG = {{
+	{GPIOF, GPIO_PIN_4},
+	{GPIOA, GPIO_PIN_4},
+}};
 // CAN
 //simpleCanUser can(&hcan);
 CanUser can(&hcan);
@@ -101,6 +106,11 @@ void init(void){
 	for (uint8_t i = 0; i < 10; ++i) {
 		HAL_GPIO_WritePin(LED[i].GPIOx, LED[i].GPIO_Pin, GPIO_PIN_SET);
 		HAL_Delay(100);
+	}
+
+	// 非常停止解除
+	for (uint8_t i = 0; i < 2; ++i) {
+		HAL_GPIO_WritePin(EMG[i].GPIOx, EMG[i].GPIO_Pin, GPIO_PIN_SET);
 	}
 }
 
