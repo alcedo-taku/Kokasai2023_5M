@@ -45,6 +45,14 @@ at::InputData input_data;
 at::OutputData output_data;
 SensorData sensor_data;
 
+// GPIO
+constexpr std::array<GPIO_pin,4> gpio_pin = {{
+	// 回路上の印字と実際の配線が異なるので注意?
+	{GPIO1_GPIO_Port, GPIO1_Pin}, // そのunitbaseの番号を決める、ジャンパーあり→0, なし→1
+	{GPIO2_GPIO_Port, GPIO2_Pin},
+	{GPIO3_GPIO_Port, GPIO3_Pin},
+	{GPIO4_GPIO_Port, GPIO4_Pin},
+}};
 
 // モータ
 std::array<halex::Motor, 4> motor = {
@@ -136,9 +144,9 @@ void init(void){
 	can.setFilterBank(14); // どこまでのバンクを使うか
 	can.setStoreRxFifo(CAN_RX_FIFO0); // 使うFIFOメモリ＿
 	if (unit_num == 0) {
-		can.setFourTypePathId(can_id.main_to_unit, can_id.unit1_to_unit0, can_id.ctrl0_to_unit0, 100);
+		can.setFourTypePathId(CanId::main_to_unit, CanId::unit1_to_unit0, CanId::ctrl0_to_unit0, 100);
 	}else if (unit_num == 1){
-		can.setFourTypePathId(can_id.main_to_unit, can_id.unit0_to_unit1, can_id.ctrl1_to_unit1, 100);
+		can.setFourTypePathId(CanId::main_to_unit, CanId::unit0_to_unit1, CanId::ctrl1_to_unit1, 100);
 	}
 	can.setFilterConfig(); // フィルターの設定を反映する
 	HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING); // 受信割り込みの有効化
@@ -228,6 +236,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		input_data.myself.enc_roller_rotation = encoder[0].getCount();
 		input_data.myself.enc_position = encoder[1].getCount();
 		input_data.myself.pot_angle_of_turret = adc_value_array[0];
+		input_data.is_pusshed_lounch_reset = (uint8_t)HAL_GPIO_ReadPin(GPIO2_GPIO_Port, GPIO2_Pin);
+		input_data.is_pusshed_lounch_reset = !input_data.is_pusshed_lounch_reset;
 
 		/* 敵ロボットからの情報の代入 */
 		input_data.enemy = data_from_unit.sensor_data;
@@ -247,9 +257,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 			case 0:
 				// to main
 				if (unit_num == 0) {
-					can.setId(CAN_ID_STD, can_id.unit0_to_main);
+					can.setId(CAN_ID_STD, CanId::unit0_to_main);
 				}else if (unit_num == 1){
-					can.setId(CAN_ID_STD, can_id.unit1_to_main);
+					can.setId(CAN_ID_STD, CanId::unit1_to_main);
 				}
 				data_to_main.debug_count++;
 				can_state = can.transmit(sizeof(data_to_main), (uint8_t*)&data_to_main);
@@ -258,9 +268,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 			case 1:
 				// to unit
 				if (unit_num == 0) {
-					can.setId(CAN_ID_STD, can_id.unit0_to_unit1);
+					can.setId(CAN_ID_STD, CanId::unit0_to_unit1);
 				}else if (unit_num == 1){
-					can.setId(CAN_ID_STD, can_id.unit1_to_unit0);
+					can.setId(CAN_ID_STD, CanId::unit1_to_unit0);
 				}
 				data_to_unit.debug_count++;
 				can_state = can.transmit(sizeof(data_to_unit), (uint8_t*)&data_to_unit);
@@ -269,9 +279,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 			case 2:
 				// to controller
 				if (unit_num == 0) {
-					can.setId(CAN_ID_STD, can_id.unit0_to_ctrl0);
+					can.setId(CAN_ID_STD, CanId::unit0_to_ctrl0);
 				}else if (unit_num == 1){
-					can.setId(CAN_ID_STD, can_id.unit1_to_ctrl1);
+					can.setId(CAN_ID_STD, CanId::unit1_to_ctrl1);
 				}
 				can_state = can.transmit(sizeof(data_to_ctrl), (uint8_t*)&data_to_ctrl);
 				can_transmit_count = 0; // ラストは0にする
@@ -304,19 +314,19 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan){
 //		disconnect_count = 0;
 		switch (can.getRxId()) {
 			// from main
-			case can_id.main_to_unit:
+			case CanId::main_to_unit:
 				memcpy(&data_from_main, &buf, sizeof(data_from_main));
 				break;
 
 			// from unit
-			case can_id.unit1_to_unit0:
-			case can_id.unit0_to_unit1:
+			case CanId::unit1_to_unit0:
+			case CanId::unit0_to_unit1:
 				memcpy(&data_from_unit,&buf,sizeof(data_from_unit));
 				break;
 
 			// from controller
-			case can_id.ctrl0_to_unit0:
-			case can_id.ctrl1_to_unit1:
+			case CanId::ctrl0_to_unit0:
+			case CanId::ctrl1_to_unit1:
 				memcpy(&data_from_ctrl,&buf,sizeof(data_from_ctrl));
 				break;
 			default:

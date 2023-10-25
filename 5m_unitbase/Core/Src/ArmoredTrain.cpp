@@ -17,17 +17,30 @@ ArmoredTrain::ArmoredTrain() {
 }
 
 /**
+ *
+ * @param x
+ * @param in_min
+ * @param in_max
+ * @param out_min
+ * @param out_max
+ * @return
+ */
+float ArmoredTrain::map(float x, float in_min, float in_max, float out_min, float out_max){
+	return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
+/**
  * センサーの入力を、SI単位系に変換する関数
  * @param sensor_data
  * @param movement_data
  */
 void ArmoredTrain:: convert_to_SI(SensorData& sensor_data, RobotMovementData& movement_data) {
 	static SensorData prev_sensor_data;
-	movement_data.angle_of_turret			 = sensor_data.pot_angle_of_turret * 0.01;
-	movement_data.position					 = sensor_data.enc_position * 0.1;
+	movement_data.angle_of_turret			 = map(sensor_data.pot_angle_of_turret, 12928, 21960, -99.3/2*M_PI/180, 99.3/2*M_PI/180); // todo
+	movement_data.position					 = (float)sensor_data.enc_position / 5120.0f/*PPR*/ * 15/*ギヤ数*/ * 282.5 / 43.0f;
 	movement_data.angular_velocity_of_truret = (sensor_data.pot_angle_of_turret	 - prev_sensor_data.pot_angle_of_turret	) * 0.01 * frequency;
 	movement_data.velocity					 = (sensor_data.enc_position		 - prev_sensor_data.enc_position		) * 0.1 * frequency;
-	movement_data.roller_rotation			 = (sensor_data.enc_roller_rotation	 - prev_sensor_data.enc_roller_rotation	) * 0.001 * frequency;
+	movement_data.roller_rotation			 = (sensor_data.enc_roller_rotation	 - prev_sensor_data.enc_roller_rotation	) / 20.0f * 2*M_PI * frequency;
 }
 
 /**
@@ -168,13 +181,25 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 	// 横移動
 	output_data.compare[2] = input_data.ctrl.right_handle * 0.5;
 	// 砲塔旋回角度
+	if (target.angle_of_turret > RobotStaticData::turret_angle_max) {
+		target.angle_of_turret = RobotStaticData::turret_angle_max;
+	}else if (target.angle_of_turret < - RobotStaticData::turret_angle_max) {
+		target.angle_of_turret = - RobotStaticData::turret_angle_max;
+	}
 	pid_angle.update_operation(target.angle_of_turret - now.angle_of_turret);
+	int16_t manual_operation_value = input_data.ctrl.left_handle * 0.3;
 	if (mato_num < 6) {
 		constexpr float ratio = 0.7; // 補正の強さ
 		output_data.compare[3] += pid_angle.get_operation_difference();
-		output_data.compare[3] = output_data.compare[3] * ratio + input_data.ctrl.left_handle * (1-ratio);
+		output_data.compare[3] = output_data.compare[3] * ratio + manual_operation_value * (1-ratio);
 	}else{
-		output_data.compare[3] = input_data.ctrl.left_handle;
+		output_data.compare[3] = manual_operation_value;
+	}
+	// 最大角度の時、出力を正す
+	if (now.angle_of_turret <= -RobotStaticData::turret_angle_max && output_data.compare[3] < 0) {
+		output_data.compare[3] = 0;
+	}else if(RobotStaticData::turret_angle_max <= now.angle_of_turret && output_data.compare[3] > 0){
+		output_data.compare[3] = 0;
 	}
 	// compare 上限調整
 	constexpr uint16_t max_compare = 3900;
@@ -239,7 +264,7 @@ void ArmoredTrain::update(InputData& input_data, OutputData& output_data) {
 
 	/* 射撃パラメータ(ローラー回転数、砲塔角度)の計算 */
 	// 発射パラメータ（ローラの速度、発射方向）を計算　とりま発射方向は的の角度でよくね？
-	target.roller_rotation = shot_data.v0;
+	target.roller_rotation = shot_data.v0 / 0.010;
 	target.angle_of_turret = mato[mato_num % 3].angle;
 
 	// pid等の処理をする

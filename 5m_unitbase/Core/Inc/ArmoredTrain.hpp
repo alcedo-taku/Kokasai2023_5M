@@ -51,16 +51,18 @@ struct TargetPositionA {
  * ロボットの静的な情報を格納する構造体
  */
 struct RobotStaticData {
-	static constexpr float angle_of_depression = 12;	//!< 砲塔俯角[rad]
-	static constexpr float turret_length = 0.1;			//!< 旋回中心から速度計側部までの距離[m] (l0)
-	static constexpr float radius_of_roller = 0.05;		//!< ローラー半径[m]
+	static constexpr float angle_of_depression = 10 * M_PI/180;	//!< 砲塔俯角[rad]
+	static constexpr float turret_length = 0.050;			//!< 旋回中心から速度計側部までの距離[m] (l0)
+	static constexpr float radius_of_roller = 0.012;		//!< ローラー半径[m]
 	static constexpr std::array<TargetPositionA, 3> mato = {{	//!< ロボット内座標
-			{0.01, 0.01, 12},
-			{0.01, 0.01, 12},
-			{0.01, 0.01, 12},
+			{0.010, 0.010, 12},
+			{0.010, 0.010, 12},
+			{0.010, 0.010, 12},
 	}};
 	static constexpr float time_lug1 = 0.5;				//!< 射出までにかかる時間[s]
+	static constexpr float turret_angle_max = 40 * M_PI/180; //!< 最大砲塔旋回角度
 };
+// todo パラメータ入力しろ
 //RobotStaticData static_data;
 
 /**
@@ -121,6 +123,7 @@ private:
 	aca::PID_controller pid_angle = aca::PID_controller (pid_parameter_angle, frequency);
 	aca::PID_Element pid_parameter_roller {5,0,0};
 	aca::PID_controller pid_roller = aca::PID_controller (pid_parameter_roller, frequency);
+	float map(float x, float in_min, float in_max, float out_min, float out_max);
 	void convert_to_SI(SensorData& sensor_data, RobotMovementData& movement_data);
 	void calc_initial_velocity(RobotMovementData& movement_data, BulletVelocity& bullet_velocity);	//!< 砲弾の初速度を求める 運動学　いらない
 	void calc_roller_rotation();
