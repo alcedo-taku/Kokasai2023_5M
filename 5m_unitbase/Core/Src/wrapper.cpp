@@ -39,6 +39,7 @@
 /* Struct End */
 
 /* Variable Begin */
+// 制御
 uint8_t unit_num = 0;
 at::ArmoredTrain armored_train;
 at::InputData input_data;
@@ -232,6 +233,21 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		for (uint8_t i = 0; i < 2; i++) {
 			encoder[i].update();
 			encoder_count[i] = encoder[i].getCount();
+			// 値飛びの補正
+			if (encoder_count[i] - prev_encoder_count[i] > 2000) {
+				int8_t debug = std::round((float)(encoder_count[i]-prev_encoder_count[i])/3999.0f);
+				int32_t debug2 = encoder_count[i];
+				int32_t debug3 = prev_encoder_count[i];
+				encoder_count[i] = encoder_count[i] - 3999 * debug;
+				encoder[i].setCount(encoder_count[i]);
+			}else if (encoder_count[i] - prev_encoder_count[i] < -2000) {
+				int8_t debug = std::round((float)(encoder_count[i]-prev_encoder_count[i])/3999.0f);
+				int32_t debug2 = encoder_count[i];
+				int32_t debug3 = prev_encoder_count[i];
+				encoder_count[i] = encoder_count[i] - 3999 * debug;
+				encoder[i].setCount(encoder_count[i]);
+			}
+			prev_encoder_count[i] = encoder_count[i];
 		}
 		if (!(bool)HAL_GPIO_ReadPin(gpio_pin[2].GPIOx, gpio_pin[2].GPIO_Pin)) {
 			encoder[1].resetCount();
