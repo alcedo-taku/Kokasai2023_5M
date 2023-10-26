@@ -115,16 +115,26 @@ enum class ShotState : uint8_t{
 
 class ArmoredTrain {
 private:
-//	RobotMovementData myself;		//!< 自分の動き
-//	RobotMovementData enemy;		//!< 敵の動き
+	// 変数
+	RobotMovementDataSet now;
+	RobotMovementDataSet future;
+	RobotMovementData future0_myself;
+	RobotMovementData target;
+	std::array<TargetPositionR, 3> mato;	//!< 的の位置
+	ShotData shot_data;
+	SensorData prev_myself;
+	SensorData prev_enemy;
+	// pidクラス
 	aca::PID_Element pid_parameter_position = {5,0,0};
 	aca::PID_controller pid_position = aca::PID_controller (pid_parameter_position, frequency);
 	aca::PID_Element pid_parameter_angle {5,0,0};
 	aca::PID_controller pid_angle = aca::PID_controller (pid_parameter_angle, frequency);
-	aca::PID_Element pid_parameter_roller {5,0,0};
+	aca::PID_Element pid_parameter_roller {2,0,0};
 	aca::PID_controller pid_roller = aca::PID_controller (pid_parameter_roller, frequency);
-	float map(float x, float in_min, float in_max, float out_min, float out_max);
-	void convert_to_SI(SensorData& sensor_data, RobotMovementData& movement_data);
+	// 関数
+	template <typename T> T map(T x, T in_min, T in_max, T out_min, T out_max);
+	template <typename T> T suppress_value(T value, T max_abs_value);
+	void convert_to_SI(SensorData& prev_sensor_data, SensorData& sensor_data, RobotMovementData& movement_data);
 	void calc_initial_velocity(RobotMovementData& movement_data, BulletVelocity& bullet_velocity);	//!< 砲弾の初速度を求める 運動学　いらない
 	void calc_roller_rotation();
 	void calc_pos_fut(RobotMovementData& movement_data_now, RobotMovementData movement_data_fut, uint16_t time_lug);
