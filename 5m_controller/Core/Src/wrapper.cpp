@@ -211,7 +211,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		readJoystick(data.joystick);
 		data_to_unit.ctrl_data.right_handle = data.joystick[0];
 		data_to_unit.ctrl_data.left_handle = data.joystick[1];
-		data_to_unit.ctrl_data.is_pulled_trigger = !HAL_GPIO_ReadPin(gpio_pin[11].GPIOx, gpio_pin[11].GPIO_Pin);
+		data_to_unit.ctrl_data.is_pulled_trigger = !(bool)HAL_GPIO_ReadPin(gpio_pin[11].GPIOx, gpio_pin[11].GPIO_Pin);
+//		data_to_unit.ctrl_data.is_pulled_trigger = !data_to_unit.ctrl_data.is_pulled_trigger;
+//		todo ここ簡略化できない？
 
 		pwm_sounds.start_sounds();
 		pwm_sounds.update_sounds();
