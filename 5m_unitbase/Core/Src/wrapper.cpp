@@ -46,17 +46,19 @@ at::OutputData output_data;
 SensorData sensor_data;
 
 // GPIO
-constexpr std::array<GPIO_pin,4> gpio_pin = {{
-	// 回路上の印字と実際の配線が異なるので注意?
-	{GPIO1_GPIO_Port, GPIO1_Pin}, // そのunitbaseの番号を決める、ジャンパーあり→0, なし→1
-	{GPIO2_GPIO_Port, GPIO2_Pin},
-	{GPIO3_GPIO_Port, GPIO3_Pin},
-	{GPIO4_GPIO_Port, GPIO4_Pin},
+constexpr std::array<GPIO_pin,6> gpio_pin = {{
+	// ピン配置：文字を読む方から見て上から順に0-5と番号を振った
+	{GPIOF, GPIO_PIN_4}, 	// そのunitbaseの番号を決める、ジャンパーあり→0, なし→1
+	{GPIOF, GPIO_PIN_1}, 	// 射出検知
+	{GPIOF, GPIO_PIN_0}, 	// 位置のリセット
+	{GPIOC, GPIO_PIN_13},
+	{GPIOC, GPIO_PIN_14},
+	{GPIOC, GPIO_PIN_15}, 	// 通信確認用LED
 }};
 
 // モータ
 std::array<halex::Motor, 4> motor = {
-		halex::Motor(&htim4,  TIM_CHANNEL_1, &htim4,  TIM_CHANNEL_2), // 0 1 射出
+		halex::Motor(&htim4,  TIM_CHANNEL_2, &htim4,  TIM_CHANNEL_1), // 0 1 射出
 		halex::Motor(&htim1,  TIM_CHANNEL_1, &htim1,  TIM_CHANNEL_2), // 1 2 送り
 		halex::Motor(&htim8,  TIM_CHANNEL_1, &htim8,  TIM_CHANNEL_2), // 2 3 横移動
 		halex::Motor(&htim15, TIM_CHANNEL_1, &htim15, TIM_CHANNEL_2), // 3 4 旋回
@@ -64,15 +66,16 @@ std::array<halex::Motor, 4> motor = {
 
 // エンコーダ
 std::array<halex::Encoder, 2> encoder = {
-		halex::Encoder(&htim2),
-		halex::Encoder(&htim3)
+		halex::Encoder(&htim2),	// ローラー
+		halex::Encoder(&htim3)	// 位置
 };
 std::array<int32_t, 2> encoder_count;
 std::array<int32_t, 2> prev_encoder_count;
 
 // ADC
 mcp3208::MCP3208 mcp3208_reader(hspi2,SPI2_NSS_GPIO_Port,SPI2_NSS_Pin);
-std::array<uint16_t, 8> adc_value_array;
+std::array<uint16_t, 4> adc_value_array;
+
 
 // CAN
 //simpleCanUser can(&hcan);
@@ -113,15 +116,13 @@ void init(void){
 	HAL_GPIO_WritePin(LED4_GPIO_Port, LED4_Pin, GPIO_PIN_SET);
 	HAL_GPIO_WritePin(LED5_GPIO_Port, LED5_Pin, GPIO_PIN_SET);
 	HAL_GPIO_WritePin(LED6_GPIO_Port, LED6_Pin, GPIO_PIN_SET);
-	HAL_GPIO_WritePin(GPIO2_GPIO_Port, GPIO2_Pin, GPIO_PIN_SET);
-	HAL_GPIO_WritePin(GPIO3_GPIO_Port, GPIO3_Pin, GPIO_PIN_SET);
-	HAL_GPIO_WritePin(GPIO4_GPIO_Port, GPIO4_Pin, GPIO_PIN_SET);
-	HAL_GPIO_WritePin(GPIO5_GPIO_Port, GPIO5_Pin, GPIO_PIN_SET);
-	HAL_GPIO_WritePin(GPIO6_GPIO_Port, GPIO6_Pin, GPIO_PIN_SET);
+	for (uint8_t i = 3; i < 5; i++) {
+		HAL_GPIO_WritePin(gpio_pin[i].GPIOx, gpio_pin[i].GPIO_Pin, GPIO_PIN_SET);
+	}
 	HAL_Delay(1000);
 
 	// unitbase unmber を設定
-	unit_num = (uint8_t)HAL_GPIO_ReadPin(GPIO1_GPIO_Port, GPIO1_Pin);
+	unit_num = (uint8_t)HAL_GPIO_ReadPin(gpio_pin[0].GPIOx, gpio_pin[0].GPIO_Pin);
 
     //MD
     for(uint8_t i=0; i < motor.size(); i++){
@@ -161,7 +162,7 @@ void init(void){
 	HAL_TIM_Base_Start_IT(&htim16); // メイン処理用
 	HAL_TIM_Base_Start_IT(&htim17); // 通信用
 
-	HAL_GPIO_WritePin(GPIO6_GPIO_Port, GPIO6_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(gpio_pin[5].GPIOx, gpio_pin[5].GPIO_Pin, GPIO_PIN_RESET);
 
 
 	debug_count = 0;
@@ -232,12 +233,15 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 			encoder[i].update();
 			encoder_count[i] = encoder[i].getCount();
 		}
+		if (!(bool)HAL_GPIO_ReadPin(gpio_pin[2].GPIOx, gpio_pin[2].GPIO_Pin)) {
+			encoder[1].resetCount();
+		}
 		// 代入
 		input_data.myself.enc_roller_rotation = encoder[0].getCount();
 		input_data.myself.enc_position = encoder[1].getCount();
 		input_data.myself.pot_angle_of_turret = adc_value_array[0];
-		input_data.is_pusshed_lounch_reset = (uint8_t)HAL_GPIO_ReadPin(GPIO2_GPIO_Port, GPIO2_Pin);
-		input_data.is_pusshed_lounch_reset = !input_data.is_pusshed_lounch_reset;
+		input_data.is_pusshed_lounch_reset = !(bool)HAL_GPIO_ReadPin(gpio_pin[1].GPIOx, gpio_pin[1].GPIO_Pin);
+//		input_data.is_pusshed_lounch_reset = !input_data.is_pusshed_lounch_reset;
 
 		/* 敵ロボットからの情報の代入 */
 		input_data.enemy = data_from_unit.sensor_data;
@@ -337,7 +341,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan){
 	static uint8_t blink_count = 0;
 	blink_count++;
 	if(blink_count == 100){
-		HAL_GPIO_TogglePin(GPIO6_GPIO_Port, GPIO6_Pin);
+		HAL_GPIO_TogglePin(gpio_pin[5].GPIOx, gpio_pin[5].GPIO_Pin);
 		blink_count = 0;
 	}
 }
