@@ -50,6 +50,7 @@ constexpr std::array<GPIO_pin,2> EMG = {{
 	{GPIOF, GPIO_PIN_4},
 	{GPIOA, GPIO_PIN_4},
 }};
+std::array<uint8_t, 2> emg_count = {0,0};
 // CAN
 //simpleCanUser can(&hcan);
 CanUser can(&hcan);
@@ -106,11 +107,6 @@ void init(void){
 	for (uint8_t i = 0; i < 10; ++i) {
 		HAL_GPIO_WritePin(LED[i].GPIOx, LED[i].GPIO_Pin, GPIO_PIN_SET);
 		HAL_Delay(100);
-	}
-
-	// 非常停止解除
-	for (uint8_t i = 0; i < 2; ++i) {
-		HAL_GPIO_WritePin(EMG[i].GPIOx, EMG[i].GPIO_Pin, GPIO_PIN_SET);
 	}
 }
 
@@ -176,6 +172,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 				can_transmit_count = 0; // ラストは0にする
 				break;
 		}
+		for (uint8_t i = 0; i < 2; i++) {
+			emg_count[i]++;
+			if (emg_count[i] >= 254) {
+				// 非常停止かける
+				HAL_GPIO_WritePin(EMG[i].GPIOx, EMG[i].GPIO_Pin, GPIO_PIN_RESET);
+			}
+		}
 	}
 }
 
@@ -191,9 +194,13 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan){
 			// from unit
 			case CanId::unit0_to_main:
 				memcpy(&data_from_unit,&buf,sizeof(data_from_unit));
+				emg_count[0] = 0;
+				HAL_GPIO_WritePin(EMG[0].GPIOx, EMG[0].GPIO_Pin, GPIO_PIN_SET);
 				break;
 			case CanId::unit1_to_main:
 				memcpy(&data_from_unit1, &buf, sizeof(data_from_unit1));
+				emg_count[1] = 0;
+				HAL_GPIO_WritePin(EMG[1].GPIOx, EMG[1].GPIO_Pin, GPIO_PIN_SET);
 				break;
 
 			// from controller
