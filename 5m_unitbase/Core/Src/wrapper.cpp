@@ -220,6 +220,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 
 		/** インジケータ等 **/
 		data_to_ctrl.game_state = data_from_main.game_state;
+		input_data.game_state = data_from_main.game_state;
 
 		/** メイン動作処理 begin **/
 		/* コントローラからの値の代入 */
@@ -260,7 +261,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		input_data.myself.enc_position = encoder[1].getCount();
 		input_data.myself.pot_angle_of_turret = adc_value_array[0];
 		input_data.is_pusshed_lounch_reset = !(bool)HAL_GPIO_ReadPin(gpio_pin[1].GPIOx, gpio_pin[1].GPIO_Pin);
-//		input_data.is_pusshed_lounch_reset = !input_data.is_pusshed_lounch_reset;
 
 		/* 敵ロボットからの情報の代入 */
 		input_data.enemy = data_from_unit.sensor_data;

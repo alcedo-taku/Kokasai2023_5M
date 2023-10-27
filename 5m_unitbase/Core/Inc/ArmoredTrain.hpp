@@ -21,6 +21,7 @@ struct InputData {
 	SensorData enemy;
 	bool is_pusshed_lounch_reset;
 	ControllerData ctrl;
+	GameState game_state;
 };
 
 /**
@@ -124,6 +125,8 @@ private:
 	ShotData shot_data;
 	SensorData prev_myself;
 	SensorData prev_enemy;
+	std::array<int16_t, 4> prev_compare = {0,0,0,0};
+	GameState prev_game_state = GameState::STOP;
 	// pidクラス
 	aca::PID_Element pid_parameter_position = {5,0,0};
 	aca::PID_controller pid_position = aca::PID_controller (pid_parameter_position, frequency);
