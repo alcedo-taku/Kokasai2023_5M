@@ -82,7 +82,16 @@ constexpr std::array<GPIO_pin,13> gpio_pin = {{
 	{GPIOF, GPIO_PIN_6},	// 11:in トリガー
 	{GPIOF, GPIO_PIN_7}		// 12:in コントローラの番号を決める
 }};
-Music music_start[6]     = { {SoundScale::E4, 250}, {SoundScale::R, 750}, {SoundScale::E4, 250}, {SoundScale::R, 750}, {SoundScale::E5, 1000}, {SoundScale::R, 2000},  }; // 音階と各音の時間を指定
+Music music_start[8]     = { 	{SoundScale::R, 0},
+								{SoundScale::E4, 250}, {SoundScale::R, 750},
+								{SoundScale::E4, 250}, {SoundScale::R, 750},
+								{SoundScale::E4, 250}, {SoundScale::R, 750},
+								{SoundScale::E5, 1000}, }; // 音階と各音の時間を指定
+Music music_end[8]     = { 		{SoundScale::R, 0},
+								{SoundScale::E4, 250}, {SoundScale::R, 750},
+								{SoundScale::E4, 250}, {SoundScale::R, 750},
+								{SoundScale::E4, 250}, {SoundScale::R, 750},
+								{SoundScale::E3, 1000}, };
 Music music_locked_on[2] = { {SoundScale::E2, 1600}, {SoundScale::R, 500} };
 Music music_hited[2]     = { {SoundScale::C2, 200}, {SoundScale::R, 1000} };
 Music music_hit[2]       = { {SoundScale::C5, 200}, {SoundScale::R, 1000} };
@@ -149,9 +158,6 @@ void init(void){
 	adc0Range = 200;
 	HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adcBuf, 4);
 
-	// PWM sound
-	pwm_sounds.set_sounds(music_start, (uint8_t)(sizeof(music_start)/sizeof(Music)));
-
 	HAL_Delay(1000);
 
 	HAL_TIM_Base_Start_IT(&htim17); // 送信用タイマー割り込み
@@ -212,11 +218,25 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		data_to_unit.ctrl_data.right_handle = data.joystick[0];
 		data_to_unit.ctrl_data.left_handle = data.joystick[1];
 		data_to_unit.ctrl_data.is_pulled_trigger = !(bool)HAL_GPIO_ReadPin(gpio_pin[11].GPIOx, gpio_pin[11].GPIO_Pin);
-//		data_to_unit.ctrl_data.is_pulled_trigger = !data_to_unit.ctrl_data.is_pulled_trigger;
-//		todo ここ簡略化できない？
 
-		pwm_sounds.start_sounds();
+		switch (data_from_unit.game_state) {
+			case GameState::STOP:
+				break;
+			case GameState::READY:
+				pwm_sounds.set_sounds(music_start, (uint8_t)(sizeof(music_start)/sizeof(Music)));
+				pwm_sounds.start_sounds();
+				break;
+			case GameState::START:
+				break;
+			case GameState::END_READY:
+				pwm_sounds.set_sounds(music_end, (uint8_t)(sizeof(music_end)/sizeof(Music)));
+				pwm_sounds.start_sounds();
+				break;
+		}
+
 		pwm_sounds.update_sounds();
+
+		// なんかのLED
 		HAL_GPIO_WritePin(led_pin[2].GPIOx, led_pin[2].GPIO_Pin, GPIO_PIN_SET);
 
 #if XBee

@@ -38,6 +38,14 @@ struct ControllerData{
 };
 /** センサーやコントローラ **/
 
+/** enum **/
+enum class GameState : uint8_t{
+	READY, 		//! スタート5秒前
+	START,		//! スタート
+	END_READY,	//! 停止5秒前
+	STOP, 		//! 停止
+};
+/** enum **/
 
 /** 通信 **/
 
@@ -59,8 +67,8 @@ struct DataFromMainToCtrl{
  * main → unitbase の通信データ
  */
 struct DataFromMainToUnit{
-	uint8_t debug_count = 0;
-	uint8_t is_moving_time = 0; //!< 右から1bit目:可否, 2bit目:ready
+//	uint8_t debug_count = 0;
+	GameState game_state = GameState::STOP;
 };
 
 /**
@@ -84,6 +92,8 @@ struct DataFromCtrlToUnit{
  */
 struct DataFromUnitToCtrl{
 	uint8_t lock_on; //!< 右から 1bit目:locking, 2bit目:locked
+	GameState game_state;
+	uint8_t mato;
 };
 
 /**

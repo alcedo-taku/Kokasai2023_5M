@@ -12,6 +12,7 @@
 /* Include End */
 
 /* Enum Begin */
+
 /* Enum End */
 
 /* Struct Begin */
@@ -33,7 +34,7 @@ constexpr std::array<GPIO_pin,10> LED = {{
 	{L10_GPIO_Port, L10_Pin} 	// 的 1-2
 }};
 //GPIO
-constexpr std::array<GPIO_pin,10> GPIO = {{
+constexpr std::array<GPIO_pin,10> gpio = {{
 	{G1_GPIO_Port, G1_Pin}, 	// スタート/ストップ
 	{G2_GPIO_Port, G2_Pin}, 	// リセット
 	{G3_GPIO_Port, G3_Pin},
@@ -133,6 +134,7 @@ void HAL_CAN_TxMailbox1CompleteCallback(CAN_HandleTypeDef *hcan){
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 	//　割り込みの処理内容
 	if(htim == &htim16){
+		// LED点滅
 		static uint16_t experiment_timer;
 		experiment_timer++;
 		switch (experiment_timer) {
@@ -146,6 +148,36 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 			default:
 				break;
 		}
+
+		// スタートストップ
+		static uint32_t start_time;
+		static uint32_t end_time;
+		switch (data_to_unit.game_state) {
+			case GameState::STOP:
+				if ( !(bool)HAL_GPIO_ReadPin(gpio[0].GPIOx, gpio[0].GPIO_Pin) ) {
+					data_to_unit.game_state = GameState::READY;
+					start_time = HAL_GetTick() + 3*1000;
+				}
+				break;
+			case GameState::READY:
+				if ( start_time <= HAL_GetTick() ) {
+					data_to_unit.game_state = GameState::START;
+					end_time = HAL_GetTick() + 120*1000;
+				}
+				break;
+			case GameState::START:
+				if ( end_time - 3*1000 <= HAL_GetTick() ){
+					data_to_unit.game_state = GameState::END_READY;
+				}
+				break;
+			case GameState::END_READY:
+				if ( end_time <= HAL_GetTick() ){
+					data_to_unit.game_state = GameState::STOP;
+				}
+				break;
+		}
+
+
 	}else if(htim == &htim17){
 		// CAN送信
 		static uint8_t can_transmit_count = 0;
@@ -153,7 +185,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 			case 0:
 				// to unit
 				can.setId(CAN_ID_STD, CanId::main_to_unit);
-				data_to_unit.debug_count++;
+//				data_to_unit.debug_count++;
 				can_state = can.transmit(sizeof(data_to_unit), (uint8_t*)&data_to_unit);
 				can_state_ = can.getState();
 				mailbox = can.getUsedTxMailbox();
@@ -195,12 +227,20 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan){
 			case CanId::unit0_to_main:
 				memcpy(&data_from_unit,&buf,sizeof(data_from_unit));
 				emg_count[0] = 0;
-				HAL_GPIO_WritePin(EMG[0].GPIOx, EMG[0].GPIO_Pin, GPIO_PIN_SET);
+				if (data_to_unit.game_state == GameState::START || data_to_unit.game_state == GameState::END_READY) {
+					HAL_GPIO_WritePin(EMG[0].GPIOx, EMG[0].GPIO_Pin, GPIO_PIN_SET);
+				}else{
+					HAL_GPIO_WritePin(EMG[0].GPIOx, EMG[0].GPIO_Pin, GPIO_PIN_RESET);
+				}
 				break;
 			case CanId::unit1_to_main:
 				memcpy(&data_from_unit1, &buf, sizeof(data_from_unit1));
 				emg_count[1] = 0;
-				HAL_GPIO_WritePin(EMG[1].GPIOx, EMG[1].GPIO_Pin, GPIO_PIN_SET);
+				if (data_to_unit.game_state == GameState::START || data_to_unit.game_state == GameState::END_READY) {
+					HAL_GPIO_WritePin(EMG[1].GPIOx, EMG[1].GPIO_Pin, GPIO_PIN_SET);
+				}else{
+					HAL_GPIO_WritePin(EMG[1].GPIOx, EMG[1].GPIO_Pin, GPIO_PIN_RESET);
+				}
 				break;
 
 			// from controller

@@ -218,9 +218,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		}
 #endif
 
+		/** インジケータ等 **/
+		data_to_ctrl.game_state = data_from_main.game_state;
+
+		/** メイン動作処理 begin **/
 		/* コントローラからの値の代入 */
 		input_data.ctrl = data_from_ctrl.ctrl_data;
-
 
 		/* センサーの値の代入 */
 		// adc
@@ -269,6 +272,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		for(uint8_t i=0; i < motor.size(); i++){
 			motor[i].setSpeed(output_data.compare[i]);
 		}
+		/** メイン動作処理 end **/
 
 	}else if(htim == &htim17){
 		/* CAN 送信 */
