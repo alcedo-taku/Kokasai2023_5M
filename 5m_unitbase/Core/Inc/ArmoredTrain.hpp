@@ -36,9 +36,9 @@ struct OutputData {
  * フィールドの寸法等を格納する構造体
  */
 struct FieldData{
-	static constexpr float opposing_distance = 0.5;	//!< 対向距離()[m]
-	static constexpr float rail_length = 2;			//!< 横移動可能長さ
-	static constexpr float gravity = 9.8;			//!< 重力加速度
+	static constexpr float opposing_distance = 2;	//!< 対向距離()[m]
+	static constexpr float rail_length = 1.4;			//!< 横移動可能長さ[m]
+	static constexpr float gravity = 9.8;			//!< 重力加速度[m/s]
 };
 
 /**
@@ -54,7 +54,7 @@ struct TargetPositionA {
 struct RobotStaticData {
 	static constexpr float angle_of_depression = 10 * M_PI/180;	//!< 砲塔俯角[rad]
 	static constexpr float turret_length = 0.050;			//!< 旋回中心から速度計側部までの距離[m] (l0)
-	static constexpr float radius_of_roller = 0.012;		//!< ローラー半径[m]
+	static constexpr float radius_of_roller = 0.0245;		//!< ローラー半径[m]
 	static constexpr std::array<TargetPositionA, 3> mato = {{	//!< ロボット内座標
 			{0.010, 0.010, 12},
 			{0.010, 0.010, 12},
@@ -62,6 +62,7 @@ struct RobotStaticData {
 	}};
 	static constexpr float time_lug1 = 0.5;				//!< 射出までにかかる時間[s]
 	static constexpr float turret_angle_max = 40 * M_PI/180; //!< 最大砲塔旋回角度
+	static constexpr float enc_to_pos_ratio = 1.0f / (5120.0f/*PPR*/*4.0f) * 15/*ギヤ数*/ * 6.28f/1000.0f;
 };
 // todo パラメータ入力しろ
 //RobotStaticData static_data;
