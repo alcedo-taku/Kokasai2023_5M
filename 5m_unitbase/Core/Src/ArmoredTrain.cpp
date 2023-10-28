@@ -222,6 +222,7 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 		// compare STARTの時に0にする
 		if (prev_game_state == GameState::READY && input_data.game_state == GameState::START) {
 			output_data.compare[i] = 0;
+			prev_compare[i] = 0;
 		}
 		// compare 上限調整
 		output_data.compare[i] = suppress_value<int16_t>(output_data.compare[i], 3900);
