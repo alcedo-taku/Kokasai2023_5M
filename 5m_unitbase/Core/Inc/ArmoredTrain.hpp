@@ -109,9 +109,10 @@ struct ShotData {
 };
 
 enum class ShotState : uint8_t{
-	SHOTING_0, 	//! 射出中（リミットスイッチ押し）
-	SHOTING_1,	//! 射出中（リミットスイッチ開放）
-	STOP, 		//! 停止
+	SHOTING_0, 		//! 射出中（リミットスイッチ押し）
+	SHOTING_1,		//! 射出中（リミットスイッチ開放）
+	COOLING_TIME,	//! 冷却時間（あんまり連射すると、すぐ打ち切ってしまうから）
+	STOP, 			//! 停止
 };
 
 class ArmoredTrain {

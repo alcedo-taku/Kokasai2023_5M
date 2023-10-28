@@ -170,6 +170,7 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 	output_data.compare[0] = pid_roller.get_operation();
 	// 送り
 	static ShotState state = ShotState::STOP;
+	static uint32_t cooling_start;
 	switch (state) {
 		case ShotState::SHOTING_0:
 			if (input_data.is_pusshed_lounch_reset == false) {
@@ -179,9 +180,16 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 			break;
 		case ShotState::SHOTING_1:
 			if (input_data.is_pusshed_lounch_reset == true) {
-				state = ShotState::STOP;
+				state = ShotState::COOLING_TIME;
+				cooling_start = HAL_GetTick();
 			}
 			output_data.compare[1] = 2000;
+			break;
+		case ShotState::COOLING_TIME:
+			if (cooling_start + 1000 <= HAL_GetTick()) {
+				state = ShotState::COOLING_TIME;
+			}
+			output_data.compare[1] = 0;
 			break;
 		case ShotState::STOP:
 			if (input_data.ctrl.is_pulled_trigger == true) {
