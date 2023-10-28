@@ -47,8 +47,8 @@ template <typename T> T ArmoredTrain::suppress_value(T value, T max_abs_value){
  * @param movement_data
  */
 void ArmoredTrain:: convert_to_SI(SensorData& prev_sensor_data, SensorData& sensor_data, RobotMovementData& movement_data) {
-	movement_data.angle_of_turret			 = map<float>(sensor_data.pot_angle_of_turret, 12928, 21960, -99.3/2*M_PI/180, 99.3/2*M_PI/180); // todo
-	movement_data.position					 = (float)sensor_data.enc_position / 5120.0f/*PPR*/ * 15/*ギヤ数*/ * 282.5 / 43.0f;
+	movement_data.angle_of_turret			 = -map<float>(sensor_data.pot_angle_of_turret, 12928, 21960, -99.3/2*M_PI/180, 99.3/2*M_PI/180); // todo
+	movement_data.position					 = (float)sensor_data.enc_position / (5120.0f/*PPR*/*4.0f) * 15/*ギヤ数*/ * 6.28f/1000.0f;
 	movement_data.angular_velocity_of_truret = (sensor_data.pot_angle_of_turret	 - prev_sensor_data.pot_angle_of_turret	) * 0.01 * frequency;
 	movement_data.velocity					 = (sensor_data.enc_position		 - prev_sensor_data.enc_position		) * 0.1 * frequency;
 	movement_data.roller_rotation			 = (sensor_data.enc_roller_rotation	 - prev_sensor_data.enc_roller_rotation	) / 20.0f * 2*M_PI * frequency;
