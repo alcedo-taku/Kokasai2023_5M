@@ -87,11 +87,15 @@ Music music_start[8]     = { 	{SoundScale::R, 0},
 								{SoundScale::E4, 250}, {SoundScale::R, 750},
 								{SoundScale::E4, 250}, {SoundScale::R, 750},
 								{SoundScale::E5, 1000}, }; // 音階と各音の時間を指定
-Music music_end[8]     = { 		{SoundScale::R, 0},
-								{SoundScale::E4, 250}, {SoundScale::R, 750},
-								{SoundScale::E4, 250}, {SoundScale::R, 750},
-								{SoundScale::E4, 250}, {SoundScale::R, 750},
-								{SoundScale::E3, 1000}, };
+Music music_end[17]     = { 	{SoundScale::E4, 250}, {SoundScale::D4, 250},
+								{SoundScale::E4, 250}, {SoundScale::D4, 250},
+								{SoundScale::E4, 250}, {SoundScale::D4, 250},
+								{SoundScale::E4, 250}, {SoundScale::D4, 250},
+								{SoundScale::E4, 250}, {SoundScale::D4, 250},
+								{SoundScale::E4, 250}, {SoundScale::D4, 250},
+								{SoundScale::E4, 250}, {SoundScale::D4, 250},
+								{SoundScale::E4, 250}, {SoundScale::D4, 250},
+								{SoundScale::E5, 1000}, };
 Music music_locked_on[2] = { {SoundScale::E2, 1600}, {SoundScale::R, 500} };
 Music music_hited[2]     = { {SoundScale::C2, 200}, {SoundScale::R, 1000} };
 Music music_hit[2]       = { {SoundScale::C5, 200}, {SoundScale::R, 1000} };
