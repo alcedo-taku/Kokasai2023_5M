@@ -187,7 +187,7 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 			break;
 		case ShotState::COOLING_TIME:
 			if (cooling_start + 1000 <= HAL_GetTick()) {
-				state = ShotState::COOLING_TIME;
+				state = ShotState::STOP;
 			}
 			output_data.compare[1] = 0;
 			break;
