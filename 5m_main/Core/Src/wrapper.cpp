@@ -162,7 +162,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 			case GameState::READY:
 				if ( start_time <= HAL_GetTick() ) {
 					data_to_unit.game_state = GameState::START;
-					end_time = HAL_GetTick() + 10*1000;
+					end_time = HAL_GetTick() + 120*1000;
 				}
 				break;
 			case GameState::START:
