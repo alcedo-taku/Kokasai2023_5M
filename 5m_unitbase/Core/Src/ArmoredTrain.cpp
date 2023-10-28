@@ -175,13 +175,13 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 			if (input_data.is_pusshed_lounch_reset == false) {
 				state = ShotState::SHOTING_1;
 			}
-			output_data.compare[1] = 1000;
+			output_data.compare[1] = 2000;
 			break;
 		case ShotState::SHOTING_1:
 			if (input_data.is_pusshed_lounch_reset == true) {
 				state = ShotState::STOP;
 			}
-			output_data.compare[1] = 1000;
+			output_data.compare[1] = 2000;
 			break;
 		case ShotState::STOP:
 			if (input_data.ctrl.is_pulled_trigger == true) {
@@ -191,7 +191,7 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 			break;
 	}
 	// 横移動
-	output_data.compare[2] = input_data.ctrl.right_handle * 0.5;
+	output_data.compare[2] = input_data.ctrl.right_handle * 0.8;
 	// 砲塔旋回角度
 	target.angle_of_turret = suppress_value<float>(target.angle_of_turret, RobotStaticData::turret_angle_max);
 	pid_angle.update_operation(target.angle_of_turret - now.angle_of_turret);
@@ -217,9 +217,9 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 		}
 		// compare 上限調整
 		output_data.compare[i] = suppress_value<int16_t>(output_data.compare[i], 3900);
-		// compare 加速度調整
-		output_data.compare[i] = prev_compare[i] + suppress_value(output_data.compare[i]-prev_compare[i], 1);
 	}
+	// compare 加速度調整
+	output_data.compare[0] = prev_compare[0] + suppress_value(output_data.compare[0]-prev_compare[0], 1);
 	prev_game_state = input_data.game_state;
 	prev_compare = output_data.compare;
 
