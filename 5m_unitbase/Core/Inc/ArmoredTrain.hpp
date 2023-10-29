@@ -71,7 +71,7 @@ struct RobotStaticData {
  * 自分からの相対座標系での敵の的の角度
  */
 struct TargetPositionR {
-	float l,angle;
+	float l,angle_pos,angle_set;
 };
 
 /**

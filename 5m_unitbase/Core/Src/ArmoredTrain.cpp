@@ -116,12 +116,25 @@ void ArmoredTrain::calc_shot(RobotMovementDataSet& movement_data, ShotData& shot
  * @param mato
  */
 void ArmoredTrain::calc_pos_of_mato(RobotMovementDataSet& movement_data, std::array<TargetPositionR, 3>& mato){
+	float cos_turret = std::cos(movement_data.enemy.angle_of_turret);
+	float sin_turret = std::sin(movement_data.enemy.angle_of_turret);
 	for (uint8_t i = 0; i < 3; i++) {
+		// 1. 敵ロボット自信からの的の相対位置
 		// 砲塔についていないターゲット
-		float x = movement_data.myself.position + movement_data.enemy.position - FieldData::rail_length + RobotStaticData::mato[i].x;
-		float y = FieldData::opposing_distance - RobotStaticData::mato[i].y;
+		float x = RobotStaticData::mato[i].x;
+		float y = RobotStaticData::mato[i].y;
+		float angle = RobotStaticData::mato[i].angle;
+		// 砲塔についているターゲット（砲塔についている場合はここを有効にする、ついていない場合は、コメントアウトする）
+		x = cos_turret*x - sin_turret*y;
+		y = sin_turret*x + cos_turret*y;
+		angle = angle + movement_data.enemy.angle_of_turret;
+
+		// 2. 自分からの相対位置
+		x = movement_data.myself.position + movement_data.enemy.position - FieldData::rail_length + x;
+		y = FieldData::opposing_distance - y;
 		mato[i].l = std::sqrt(x*x + y*y);
-		mato[i].angle = std::atan2(x, y);
+		mato[i].angle_pos = std::atan2(x, y);
+		mato[i].angle_set = angle;
 	}
 }
 
@@ -138,8 +151,8 @@ uint8_t ArmoredTrain:: judge_mato(std::array<TargetPositionR, 3>& mato, float& a
 	float evaluation_value = 100000;
 	constexpr float ratio = 0.7;
 	for (uint8_t i = 0; i < 3; i++) {
-		pos_e = std::pow(angle_of_shot - RobotStaticData::mato[i].angle, 2);
-		ang_e = std::pow(angle_of_shot - mato[i].angle, 2);
+		pos_e = std::pow(angle_of_shot - mato[i].angle_set, 2);
+		ang_e = std::pow(angle_of_shot - mato[i].angle_pos, 2);
 		float this_evaluation_value = pos_e * ratio + ang_e * (1-ratio);
 		if (this_evaluation_value < evaluation_value) {
 			mato_num = i;
@@ -275,7 +288,7 @@ void ArmoredTrain::update(InputData& input_data, OutputData& output_data) {
 	/* 射撃パラメータ(ローラー回転数、砲塔角度)の計算 */
 	// 発射パラメータ（ローラの速度、発射方向）を計算　とりま発射方向は的の角度でよくね？
 	target.roller_rotation = shot_data.v0 / 0.010;
-	target.angle_of_turret = mato[mato_num % 3].angle;
+	target.angle_of_turret = mato[mato_num % 3].angle_pos;
 
 	// pid等の処理をする
 	calc_output(now.myself, target, mato_num, input_data, output_data);
