@@ -254,7 +254,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 			prev_encoder_count[i] = encoder_count[i];
 		}
 		if (!(bool)HAL_GPIO_ReadPin(gpio_pin[2].GPIOx, gpio_pin[2].GPIO_Pin)) {
-			encoder[1].resetCount();
+//			encoder[1].resetCount();
+			encoder[1].setCount(1.4/at::RobotStaticData::enc_to_pos_ratio);
 		}
 		// 代入
 		input_data.myself.enc_roller_rotation = encoder[0].getCount();
