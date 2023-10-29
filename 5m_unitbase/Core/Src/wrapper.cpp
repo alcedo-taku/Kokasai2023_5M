@@ -72,12 +72,11 @@ std::array<halex::Motor, 4> motor = {
 };
 
 // エンコーダ
-std::array<halex::Encoder, 2> encoder = {
-		halex::Encoder(&htim2),	// ローラー
+std::array<halex::Encoder, 1> encoder = {
+//		halex::Encoder(&htim2),	// ローラー
 		halex::Encoder(&htim3)	// 位置
 };
-std::array<int32_t, 2> encoder_count;
-std::array<int32_t, 2> prev_encoder_count;
+std::array<int32_t, 2> encoder_count = {0,0};
 
 // ADC
 mcp3208::MCP3208 mcp3208_reader(hspi2,SPI2_NSS_GPIO_Port,SPI2_NSS_Pin);
@@ -142,7 +141,7 @@ void init(void){
 
 	// エンコーダ
 	encoder[0].start();
-	encoder[1].start();
+//	encoder[1].start();
 
 	// CAN
 	// CANの初期設定
@@ -183,6 +182,14 @@ void loop(void){
 //	uint16_t adc_value;
 //	mcp3208_reader.update(mcp3208::Channel::CH_0, 0xF);
 //	adc_value_array[0] = mcp3208_reader.get(mcp3208::Channel::CH_0);
+}
+
+void exit_gpio(void) {
+	static uint32_t g_time = 0;
+	if (g_time + 10 <= HAL_GetTick()) {
+		encoder_count[0]++;
+		g_time = HAL_GetTick();
+	}
 }
 
 uint16_t experiment_timer;
@@ -252,18 +259,19 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 			adc_value_array[i] = mcp3208_reader.get( (mcp3208::Channel)i );
 		}
 		// encoder
-		for (uint8_t i = 0; i < 2; i++) {
-			encoder[i].update();
-			encoder_count[i] = encoder[i].getCount();
-		}
+//		for (uint8_t i = 0; i < 1; i++) {
+//			encoder[i].update();
+//			encoder_count[i] = encoder[i].getCount();
+//		}
+		encoder[0].update();
+		encoder_count[1] = encoder[0].getCount();
 		if (!(bool)HAL_GPIO_ReadPin(gpio_pin[2].GPIOx, gpio_pin[2].GPIO_Pin)) {
-//			encoder[1].resetCount();
-			encoder[1].setCount(1.4/at::RobotStaticData::enc_to_pos_ratio);
+//			encoder[0].resetCount();
+			encoder[0].setCount(1.4f/at::RobotStaticData::enc_to_pos_ratio);
 		}
 		// 代入
-//		input_data.myself.enc_roller_rotation = encoder[0].getCount();
-		input_data.myself.enc_roller_rotation = TIM2->CNT;
-		input_data.myself.enc_position = encoder[1].getCount();
+		input_data.myself.enc_roller_rotation = encoder_count[0];
+		input_data.myself.enc_position = encoder_count[1];
 		input_data.myself.pot_angle_of_turret = adc_value_array[0];
 		input_data.is_pusshed_lounch_reset = !(bool)HAL_GPIO_ReadPin(gpio_pin[1].GPIOx, gpio_pin[1].GPIO_Pin);
 
@@ -399,6 +407,4 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan){
 		blink_count = 0;
 	}
 }
-
-
 /* Function Body End */
