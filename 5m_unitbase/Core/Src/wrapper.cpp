@@ -261,7 +261,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 			encoder[1].setCount(1.4/at::RobotStaticData::enc_to_pos_ratio);
 		}
 		// 代入
-		input_data.myself.enc_roller_rotation = encoder[0].getCount();
+//		input_data.myself.enc_roller_rotation = encoder[0].getCount();
+		input_data.myself.enc_roller_rotation = TIM2->CNT;
 		input_data.myself.enc_position = encoder[1].getCount();
 		input_data.myself.pot_angle_of_turret = adc_value_array[0];
 		input_data.is_pusshed_lounch_reset = !(bool)HAL_GPIO_ReadPin(gpio_pin[1].GPIOx, gpio_pin[1].GPIO_Pin);
