@@ -258,6 +258,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		for(uint8_t i=0; i < motor.size(); i++){
 			motor[i].setSpeed(output_data.compare[i]);
 		}
+		/* ロックオン関係の情報を整理 */
+		data_to_ctrl.lock_on = output_data.lock_on | data_from_unit.lock_on <<1;
+
 		/** メイン動作処理 end **/
 
 	}else if(htim == &htim17){

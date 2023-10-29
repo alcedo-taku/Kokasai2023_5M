@@ -129,6 +129,10 @@ private:
 	SensorData prev_enemy;
 	std::array<int16_t, 4> prev_compare = {0,0,0,0};
 	GameState prev_game_state = GameState::STOP;
+	// とりあえずここに置く変数
+	float pos_e;
+	float ang_e;
+	float evaluation_value = 100000;
 	// pidクラス
 	aca::PID_Element pid_parameter_position = {5,0,0};
 	aca::PID_controller pid_position = aca::PID_controller (pid_parameter_position, frequency);

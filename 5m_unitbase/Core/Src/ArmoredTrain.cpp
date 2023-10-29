@@ -146,16 +146,17 @@ void ArmoredTrain::calc_pos_of_mato(RobotMovementDataSet& movement_data, std::ar
  */
 uint8_t ArmoredTrain:: judge_mato(std::array<TargetPositionR, 3>& mato, float& angle_of_shot) {
 	uint8_t mato_num;
-	float pos_e;
-	float ang_e;
-	float evaluation_value = 100000;
 	constexpr float ratio = 0.7;
+	evaluation_value = 100000;
 	for (uint8_t i = 0; i < 3; i++) {
-		pos_e = std::pow(angle_of_shot - mato[i].angle_set, 2);
-		ang_e = std::pow(angle_of_shot - mato[i].angle_pos, 2);
-		float this_evaluation_value = pos_e * ratio + ang_e * (1-ratio);
+		float this_pos_e = std::pow(angle_of_shot - mato[i].angle_set, 2);
+		float this_ang_e = std::pow(angle_of_shot - mato[i].angle_pos, 2);
+		float this_evaluation_value = this_pos_e * ratio + this_ang_e * (1-ratio);
 		if (this_evaluation_value < evaluation_value) {
 			mato_num = i;
+			evaluation_value = this_evaluation_value;
+			pos_e = this_pos_e;
+			ang_e = this_ang_e;
 		}
 	}
 	if (ang_e < 0.1) { // ロックオンできたか
@@ -221,6 +222,9 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 		constexpr float ratio = 0.7; // 補正の強さ
 		output_data.compare[3] += pid_angle.get_operation_difference();
 		output_data.compare[3] = output_data.compare[3] * ratio + manual_operation_value * (1-ratio);
+		if (mato_num < 3) {
+			output_data.lock_on = 1;
+		}
 	}else{
 		output_data.compare[3] = manual_operation_value;
 	}
