@@ -293,6 +293,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 				can_transmit_count++;
 				break;
 			case 2:
+				can_transmit_count++;
+				break;
+			case 3:
 				can_transmit_count = 0; // ラストは0にする
 				break;
 		}

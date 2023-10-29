@@ -23,7 +23,7 @@ struct GPIO_pin {
  * センサーの生値
  */
 struct SensorData {
-	uint32_t enc_roller_rotation;	//!< count(微分していない値)
+	int32_t enc_roller_rotation;	//!< count(微分していない値)
 	int32_t enc_position;			//!< count(微分していない値)
 	uint32_t pot_angle_of_turret;
 };
@@ -110,14 +110,16 @@ struct DataFromUnitToUnit{
  */
 struct CanId{
 	// unit to unit
-	static constexpr uint32_t unit0_to_unit1 = 0x100;
-	static constexpr uint32_t unit1_to_unit0 = 0x101;
+	static constexpr uint32_t unit0_to_unit1_h = 0x100;
+	static constexpr uint32_t unit0_to_unit1_l = 0x102;
+	static constexpr uint32_t unit1_to_unit0_h = 0x101;
+	static constexpr uint32_t unit1_to_unit0_l = 0x104;
 	// main to
 	static constexpr uint32_t main_to_unit	= 0x113;
 	static constexpr uint32_t main_to_ctrl	= 0x114; // 不要
 	// to main
-	static constexpr uint32_t ctrl0_to_main  = 0x103; // 不要
-	static constexpr uint32_t ctrl1_to_main  = 0x104; // 不要
+	static constexpr uint32_t ctrl0_to_main  = 0x107; // 不要
+	static constexpr uint32_t ctrl1_to_main  = 0x108; // 不要
 	static constexpr uint32_t unit0_to_main  = 0x105;
 	static constexpr uint32_t unit1_to_main  = 0x106;
 	// unit - ctrl

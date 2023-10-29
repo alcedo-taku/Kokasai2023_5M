@@ -36,6 +36,12 @@
 /* Enum End */
 
 /* Struct Begin */
+struct DebugValue {
+	// [byte]
+	uint8_t size_of_u2m;
+	uint8_t size_of_u2u;
+	uint8_t size_of_u2c;
+};
 /* Struct End */
 
 /* Variable Begin */
@@ -100,6 +106,7 @@ DataFromCtrlToUnit data_from_ctrl;
 DataFromUnitToCtrl data_to_ctrl;
 uint8_t debug_count = 0;
 
+DebugValue debug_value;
 
 /* Variable End */
 
@@ -146,9 +153,9 @@ void init(void){
 	can.setFilterBank(14); // どこまでのバンクを使うか
 	can.setStoreRxFifo(CAN_RX_FIFO0); // 使うFIFOメモリ＿
 	if (unit_num == 0) {
-		can.setFourTypePathId(CanId::main_to_unit, CanId::unit1_to_unit0, CanId::ctrl0_to_unit0, 100);
+		can.setFourTypePathId(CanId::main_to_unit, CanId::unit1_to_unit0_h, CanId::unit1_to_unit0_l, CanId::ctrl0_to_unit0);
 	}else if (unit_num == 1){
-		can.setFourTypePathId(CanId::main_to_unit, CanId::unit0_to_unit1, CanId::ctrl1_to_unit1, 100);
+		can.setFourTypePathId(CanId::main_to_unit, CanId::unit0_to_unit1_h, CanId::unit0_to_unit1_l, CanId::ctrl1_to_unit1);
 	}
 	can.setFilterConfig(); // フィルターの設定を反映する
 	HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING); // 受信割り込みの有効化
@@ -167,6 +174,9 @@ void init(void){
 
 
 	debug_count = 0;
+	debug_value.size_of_u2c = sizeof(data_to_ctrl);
+	debug_value.size_of_u2m = sizeof(data_to_main);
+	debug_value.size_of_u2u = sizeof(data_to_unit);
 }
 
 void loop(void){
@@ -217,14 +227,22 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 				break;
 		}
 #endif
+		experiment_timer++;
+		if (experiment_timer > 4000) {
+			experiment_timer = 0;
+		}
 
-		/** インジケータ等 **/
+		/** 受信情報を整理 **/
+		/* from main インジケータ */
 		data_to_ctrl.game_state = data_from_main.game_state;
 		input_data.game_state = data_from_main.game_state;
+		/* from controller */
+		input_data.ctrl = data_from_ctrl.ctrl_data;
+		/* from unit */
+		input_data.enemy = data_from_unit.sensor_data;
 
 		/** メイン動作処理 begin **/
-		/* コントローラからの値の代入 */
-		input_data.ctrl = data_from_ctrl.ctrl_data;
+
 
 		/* センサーの値の代入 */
 		// adc
@@ -258,14 +276,19 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		for(uint8_t i=0; i < motor.size(); i++){
 			motor[i].setSpeed(output_data.compare[i]);
 		}
-		/* ロックオン関係の情報を整理 */
-		data_to_ctrl.lock_on = output_data.lock_on | data_from_unit.lock_on <<1;
-
 		/** メイン動作処理 end **/
+
+
+		/** 送信情報を整理 **/
+		/* to controller */
+		data_to_ctrl.lock_on = output_data.lock_on | data_from_unit.lock_on <<1;
+		/* to unit */
+		data_to_unit.sensor_data = input_data.myself;
 
 	}else if(htim == &htim17){
 		/* CAN 送信 */
 		static uint8_t can_transmit_count = 0;
+		std::array<uint8_t,8>buf{};
 		switch(can_transmit_count){
 			case 0:
 				// to main
@@ -279,17 +302,31 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 				can_transmit_count++;
 				break;
 			case 1:
-				// to unit
+				// to unit h
 				if (unit_num == 0) {
-					can.setId(CAN_ID_STD, CanId::unit0_to_unit1);
+					can.setId(CAN_ID_STD, CanId::unit0_to_unit1_h);
 				}else if (unit_num == 1){
-					can.setId(CAN_ID_STD, CanId::unit1_to_unit0);
+					can.setId(CAN_ID_STD, CanId::unit1_to_unit0_h);
 				}
-				data_to_unit.debug_count++;
-				can_state = can.transmit(sizeof(data_to_unit), (uint8_t*)&data_to_unit);
+				data_to_unit.debug_count = experiment_timer/1000;
+
+				memcpy(&buf,&data_to_unit,sizeof(buf));
+				can_state = can.transmit(sizeof(buf), (uint8_t*)&buf);
 				can_transmit_count++;
 				break;
 			case 2:
+				// to unit l
+				if (unit_num == 0) {
+					can.setId(CAN_ID_STD, CanId::unit0_to_unit1_l);
+				}else if (unit_num == 1){
+					can.setId(CAN_ID_STD, CanId::unit1_to_unit0_l);
+				}
+
+				memcpy(&buf,&data_to_unit.sensor_data.enc_position,sizeof(buf));
+				can_state = can.transmit(sizeof(buf), (uint8_t*)&buf);
+				can_transmit_count++;
+				break;
+			case 3:
 				// to controller
 				if (unit_num == 0) {
 					can.setId(CAN_ID_STD, CanId::unit0_to_ctrl0);
@@ -307,6 +344,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 //// 送信成功で呼び出される
 //void HAL_CAN_TxMailbox0CompleteCallback(CAN_HandleTypeDef *hcan){
 //	mailbox0_complete_count ++;
+
 //}
 //
 //void HAL_CAN_TxMailbox1CompleteCallback(CAN_HandleTypeDef *hcan){
@@ -331,10 +369,16 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan){
 				memcpy(&data_from_main, &buf, sizeof(data_from_main));
 				break;
 
-			// from unit
-			case CanId::unit1_to_unit0:
-			case CanId::unit0_to_unit1:
-				memcpy(&data_from_unit,&buf,sizeof(data_from_unit));
+			// from unit h
+			case CanId::unit1_to_unit0_h:
+			case CanId::unit0_to_unit1_h:
+				memcpy(&data_from_unit,&buf,sizeof(buf));
+				break;
+
+			// from unit l
+			case CanId::unit1_to_unit0_l:
+			case CanId::unit0_to_unit1_l:
+				memcpy((uint8_t*)(&data_from_unit.sensor_data.enc_position),&buf,sizeof(buf));
 				break;
 
 			// from controller
