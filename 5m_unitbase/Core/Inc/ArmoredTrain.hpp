@@ -146,7 +146,7 @@ private:
 	void convert_to_SI(SensorData& prev_sensor_data, SensorData& sensor_data, RobotMovementData& movement_data);
 	void calc_initial_velocity(RobotMovementData& movement_data, BulletVelocity& bullet_velocity);	//!< 砲弾の初速度を求める 運動学　いらない
 	void calc_roller_rotation();
-	void calc_pos_fut(RobotMovementData& movement_data_now, RobotMovementData movement_data_fut, uint16_t time_lug);
+	void calc_pos_fut(RobotMovementData& movement_data_now, RobotMovementData& movement_data_fut, uint16_t time_lug);
 	void calc_shot(RobotMovementDataSet& movement_data, ShotData& shot_data);
 	void calc_pos_of_mato(RobotMovementDataSet& movement_data, std::array<TargetPositionR, 3>& mato);		//!< 本体の位置から的の位置を計算する
 	uint8_t judge_mato(std::array<TargetPositionR, 3>& mato, float& angle_of_shot);

@@ -85,7 +85,7 @@ void ArmoredTrain::calc_roller_rotation() {
  * @param movement_data_fut
  * @param time_lug
  */
-void ArmoredTrain::calc_pos_fut(RobotMovementData& movement_data_now, RobotMovementData movement_data_fut, uint16_t time_lug){
+void ArmoredTrain::calc_pos_fut(RobotMovementData& movement_data_now, RobotMovementData& movement_data_fut, uint16_t time_lug){
 	movement_data_fut.velocity 						= movement_data_now.velocity;
 	movement_data_fut.position 						= movement_data_now.position 		+ movement_data_fut.velocity * time_lug;
 	movement_data_fut.angular_velocity_of_truret 	= movement_data_now.angular_velocity_of_truret;
