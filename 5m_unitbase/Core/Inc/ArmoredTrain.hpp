@@ -52,13 +52,13 @@ struct TargetPositionA {
  * ロボットの静的な情報を格納する構造体
  */
 struct RobotStaticData {
-	static constexpr float angle_of_depression = 10 * M_PI/180;	//!< 砲塔俯角[rad]
+	static constexpr float angle_of_depression = 1 * M_PI/180;	//!< 砲塔俯角[rad]
 	static constexpr float turret_length = 0.050;			//!< 旋回中心から速度計側部までの距離[m] (l0)
 	static constexpr float radius_of_roller = 0.0245;		//!< ローラー半径[m]
 	static constexpr std::array<TargetPositionA, 3> mato = {{	//!< ロボット内座標
-			{0.010, 0.010, 12},
-			{0.010, 0.010, 12},
-			{0.010, 0.010, 12},
+			{-0.010, 0.0, 0},
+			{0.0, 0.010, 0},
+			{0.010, 0.0, 0},
 	}};
 	static constexpr float time_lug1 = 0.5;				//!< 射出までにかかる時間[s]
 	static constexpr float turret_angle_max = 40 * M_PI/180; //!< 最大砲塔旋回角度
@@ -129,6 +129,7 @@ private:
 	SensorData prev_enemy;
 	std::array<int16_t, 4> prev_compare = {0,0,0,0};
 	GameState prev_game_state = GameState::STOP;
+	uint8_t mato_num;
 	// とりあえずここに置く変数
 	float pos_e;
 	float ang_e;

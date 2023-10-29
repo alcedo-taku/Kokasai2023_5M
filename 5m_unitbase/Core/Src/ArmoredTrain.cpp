@@ -159,9 +159,11 @@ uint8_t ArmoredTrain:: judge_mato(std::array<TargetPositionR, 3>& mato, float& a
 			ang_e = this_ang_e;
 		}
 	}
-	if (ang_e < 0.1) { // ロックオンできたか
+	constexpr float lockon_value = std::pow(5 * M_PI/180,2);
+	constexpr float assistant_value = std::pow(90 * M_PI/180, 2);
+	if (ang_e < lockon_value) { // ロックオンできたか
 		mato_num = mato_num;
-	}else if (ang_e < 0.5) { // ここ変数にする 補正範囲に入ったか
+	}else if (ang_e < assistant_value) { // ここ変数にする 補正範囲に入ったか
 		mato_num = mato_num + 3;
 	}else { // この的を狙う
 		mato_num = mato_num + 6;
@@ -287,7 +289,7 @@ void ArmoredTrain::update(InputData& input_data, OutputData& output_data) {
 	// 今の状態だとどの方向にどの方向に飛んでいくかを計算　とりま、今向いている角度でよくね？
 //	calc_initial_velocity(now.myself, bullet_velocity); // todo 飛んでいく角度を変数に入力？　とりあえずやらなくてよくない？
 	// どの的を狙うかを計算
-	uint8_t mato_num = judge_mato(mato, future0_myself.angle_of_turret);
+	mato_num = judge_mato(mato, future0_myself.angle_of_turret);
 
 	/* 射撃パラメータ(ローラー回転数、砲塔角度)の計算 */
 	// 発射パラメータ（ローラの速度、発射方向）を計算　とりま発射方向は的の角度でよくね？
