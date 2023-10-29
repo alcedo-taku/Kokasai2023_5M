@@ -238,17 +238,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 			encoder[i].update();
 			encoder_count[i] = encoder[i].getCount();
 			// 値飛びの補正
-			if (encoder_count[i] - prev_encoder_count[i] > 2000) {
-				int8_t debug = std::round((float)(encoder_count[i]-prev_encoder_count[i])/3999.0f);
-				int32_t debug2 = encoder_count[i];
-				int32_t debug3 = prev_encoder_count[i];
-				encoder_count[i] = encoder_count[i] - 3999 * debug;
-				encoder[i].setCount(encoder_count[i]);
-			}else if (encoder_count[i] - prev_encoder_count[i] < -2000) {
-				int8_t debug = std::round((float)(encoder_count[i]-prev_encoder_count[i])/3999.0f);
-				int32_t debug2 = encoder_count[i];
-				int32_t debug3 = prev_encoder_count[i];
-				encoder_count[i] = encoder_count[i] - 3999 * debug;
+			// 今回値が前回値より counter period の半分より大きいとき、もしくは小さいとき
+			if (encoder_count[i] - prev_encoder_count[i] > 2000 || encoder_count[i] - prev_encoder_count[i] < -2000) {
+				encoder_count[i] = encoder_count[i] - 3999 * std::round((float)(encoder_count[i]-prev_encoder_count[i])/3999.0f); // counter period の倍数(if文が後者で通るときは負の値)を今回値から引いて、補正する
 				encoder[i].setCount(encoder_count[i]);
 			}
 			prev_encoder_count[i] = encoder_count[i];
