@@ -8,8 +8,11 @@
 #ifndef ARMOREDTRAIN_HPP_
 #define ARMOREDTRAIN_HPP_
 
+#include <data_type_can.hpp>
+#include <data_type_robot.hpp>
 #include "Automatic_Control_Assistant.hpp"
-#include "data_type.hpp"
+#include "ConvertToSI.hpp"
+#include <valarray>
 
 namespace at {
 
@@ -32,89 +35,6 @@ struct OutputData {
 	uint8_t lock_on; // ロックオンできたか
 };
 
-/**
- * フィールドの寸法等を格納する構造体
- */
-struct FieldData{
-	static constexpr float opposing_distance = 2;	//!< 対向距離()[m]
-	static constexpr float rail_length = 1.4;			//!< 横移動可能長さ[m]
-	static constexpr float gravity = 9.8;			//!< 重力加速度[m/s]
-};
-
-/**
- * ロボット上の的の位置を格納する構造体
- */
-struct TargetPositionA {
-	float x,y,angle;
-};
-
-/**
- * ロボットの静的な情報を格納する構造体
- */
-struct RobotStaticData {
-	static constexpr float angle_of_depression = 1 * M_PI/180;	//!< 砲塔俯角[rad]
-	static constexpr float turret_length = 0.050;			//!< 旋回中心から速度計側部までの距離[m] (l0)
-	static constexpr float radius_of_roller = 0.0245;		//!< ローラー半径[m]
-	static constexpr std::array<TargetPositionA, 3> mato = {{	//!< ロボット内座標
-			{-0.010, 0.0, 0},
-			{0.0, 0.010, 0},
-			{0.010, 0.0, 0},
-	}};
-	static constexpr float time_lug1 = 0.5;				//!< 射出までにかかる時間[s]
-	static constexpr float turret_angle_max = 40 * M_PI/180; //!< 最大砲塔旋回角度
-	static constexpr float enc_to_pos_ratio = 1.0f / (5120.0f/*PPR*/*4.0f) * 15/*ギヤ数*/ * 6.28f/1000.0f;
-};
-// todo パラメータ入力しろ
-//RobotStaticData static_data;
-
-/**
- * 自分からの相対座標系での敵の的の角度
- */
-struct TargetPositionR {
-	float l,angle_pos,angle_set;
-};
-
-/**
- * ロボットの動的な情報を格納する構造体
- */
-struct RobotMovementData {
-	float position;							//!< 位置[m]
-	float velocity;							//!< 速度[m/s]
-	float angle_of_turret;					//!< 砲塔角度[rad]
-	float angular_velocity_of_truret;		//!< 砲塔角速度[rad/s]
-//	float angle_of_depression;				//!< 砲塔俯角[rad]
-	float roller_rotation;					//!< ローラー回転数[rad/s]
-};
-
-/**
- * 自分と敵の情報のセットを格納する構造体
- */
-struct RobotMovementDataSet {
-	RobotMovementData myself;   //!< 自分の動き
-	RobotMovementData enemy;    //!< 敵の動き
-};
-
-struct BulletVelocity {
-	float x,y,z;
-};
-
-constexpr uint16_t frequency = 1000;
-
-/**
- * 発射結果等を格納する構造体
- */
-struct ShotData {
-	float l;
-	float v0;
-	float time;
-};
-
-enum class ShotState : uint8_t{
-	SHOTING_0, 		//! 射出中（リミットスイッチ押し）
-	SHOTING_1,		//! 射出中（リミットスイッチ開放）
-	COOLING_TIME,	//! 冷却時間（あんまり連射すると、すぐ打ち切ってしまうから）
-	STOP, 			//! 停止
-};
 
 class ArmoredTrain {
 private:
@@ -125,8 +45,6 @@ private:
 	RobotMovementData target;
 	std::array<TargetPositionR, 3> mato;	//!< 的の位置
 	ShotData shot_data;
-	SensorData prev_myself;
-	SensorData prev_enemy;
 	std::array<int16_t, 4> prev_compare = {0,0,0,0};
 	GameState prev_game_state = GameState::STOP;
 	uint8_t mato_num;
@@ -134,15 +52,17 @@ private:
 	float pos_e;
 	float ang_e;
 	float evaluation_value = 100000;
+	// convertクラス
+	ConvertToSI cnv_myself;
+	ConvertToSI cnv_enemy;
 	// pidクラス
 	aca::PID_Element pid_parameter_position = {5,0,0};
 	aca::PID_controller pid_position = aca::PID_controller (pid_parameter_position, frequency);
-	aca::PID_Element pid_parameter_angle {5,0,0};
+	aca::PID_Element pid_parameter_angle {10000,0,0};
 	aca::PID_controller pid_angle = aca::PID_controller (pid_parameter_angle, frequency);
 	aca::PID_Element pid_parameter_roller {2,0,0};
 	aca::PID_controller pid_roller = aca::PID_controller (pid_parameter_roller, frequency);
 	// 関数
-	template <typename T> T map(T x, T in_min, T in_max, T out_min, T out_max);
 	template <typename T> T suppress_value(T value, T max_abs_value);
 	void convert_to_SI(SensorData& prev_sensor_data, SensorData& sensor_data, RobotMovementData& movement_data);
 	void calc_initial_velocity(RobotMovementData& movement_data, BulletVelocity& bullet_velocity);	//!< 砲弾の初速度を求める 運動学　いらない

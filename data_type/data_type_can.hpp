@@ -1,51 +1,14 @@
-#ifndef DATA_TYPE
-#define DATA_TYPE
+#ifndef DATA_TYPE_CAN
+#define DATA_TYPE_CAN
 
 #include <array>
 #include <cstdint>
 #include "main.h"
+#include "data_type_robot.hpp"
 
 //constexpr uint8_t MAIN_ADDRESS = 01;
 //constexpr uint8_t ACTR_ADDRESS = 02;
 //constexpr uint64_t TARGET_XBee_ADDRESS = 0x0013A2004198443F; // 運転段階用
-
-/** 便利な構造体 **/
-struct GPIO_pin {
-    GPIO_TypeDef* GPIOx;
-    uint16_t GPIO_Pin;
-};
-/** 便利な構造体 **/
-
-
-/** センサーやコントローラ **/
-
-/**
- * センサーの生値
- */
-struct SensorData {
-	int32_t enc_roller_rotation;	//!< count(微分していない値)
-	int32_t enc_position;			//!< count(微分していない値)
-	uint32_t pot_angle_of_turret;
-};
-
-/**
- * コントローラの値
- */
-struct ControllerData{
-	int16_t left_handle;
-	int16_t right_handle;
-	bool is_pulled_trigger;
-};
-/** センサーやコントローラ **/
-
-/** enum **/
-enum class GameState : uint8_t{
-	READY, 		//! スタート5秒前
-	START,		//! スタート
-	END_READY,	//! 停止5秒前
-	STOP, 		//! 停止
-};
-/** enum **/
 
 /** 通信 **/
 
@@ -133,4 +96,4 @@ struct CanId{
 /** 通信 **/
 
 
-#endif /* DATA_TYPE */
+#endif /* DATA_TYPE_CAN */

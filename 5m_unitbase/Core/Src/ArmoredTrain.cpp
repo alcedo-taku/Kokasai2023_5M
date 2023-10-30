@@ -16,19 +16,7 @@ ArmoredTrain::ArmoredTrain() {
 //	pid_position = aca::PID_controller (pid_parameter_position, frequency);
 }
 
-/**
- *
- * @tparam T
- * @param x
- * @param in_min
- * @param in_max
- * @param out_min
- * @param out_max
- * @return
- */
-template <typename T> T ArmoredTrain::map(T x, T in_min, T in_max, T out_min, T out_max){
-	return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-}
+
 
 template <typename T> T ArmoredTrain::suppress_value(T value, T max_abs_value){
 	if (value > max_abs_value) {
@@ -47,12 +35,17 @@ template <typename T> T ArmoredTrain::suppress_value(T value, T max_abs_value){
  * @param movement_data
  */
 void ArmoredTrain:: convert_to_SI(SensorData& prev_sensor_data, SensorData& sensor_data, RobotMovementData& movement_data) {
-	movement_data.angle_of_turret			 = -map<float>(sensor_data.pot_angle_of_turret, 12928, 21960, -99.3/2*M_PI/180, 99.3/2*M_PI/180); // todo
-	movement_data.position					 = (float)sensor_data.enc_position * RobotStaticData::enc_to_pos_ratio;
-	movement_data.angular_velocity_of_truret = (sensor_data.pot_angle_of_turret	 - prev_sensor_data.pot_angle_of_turret	) * 0.01 * frequency;
-	movement_data.velocity					 = (sensor_data.enc_position		 - prev_sensor_data.enc_position		) * 0.1 * frequency;
-	movement_data.roller_rotation			 = (sensor_data.enc_roller_rotation	 - prev_sensor_data.enc_roller_rotation	) / 20.0f * 2*M_PI * frequency;
-	prev_sensor_data = sensor_data;
+	static std::valarray<float> angle(0.0, 50);
+//	constexpr float max_angle = 99.3f/2*M_PI/180;
+//	angle.shift(-1);
+//	angle[0] = map<float>((float)sensor_data.pot_angle_of_turret, 22216.0f, 13120.0f, -max_angle, max_angle);
+//	//	angle[angle_div] = map<float>((float)sensor_data.pot_angle_of_turret, 21350.0f, 12330.0f, -max_angle, max_angle);
+//	movement_data.angle_of_turret = angle.sum() / 50.0f;
+//	movement_data.position					 = (float)sensor_data.enc_position * RobotStaticData::enc_to_pos_ratio;
+//	movement_data.angular_velocity_of_truret = (sensor_data.pot_angle_of_turret	 - prev_sensor_data.pot_angle_of_turret	) * 0.01 * frequency;
+//	movement_data.velocity					 = (sensor_data.enc_position		 - prev_sensor_data.enc_position		) * 0.1 * frequency;
+//	movement_data.roller_rotation			 = (sensor_data.enc_roller_rotation	 - prev_sensor_data.enc_roller_rotation	) / 20.0f * 2*M_PI * frequency;
+//	prev_sensor_data = sensor_data;
 }
 
 /**
@@ -183,7 +176,8 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 	/* motor */
 	// 射出
 	pid_roller.update_operation(target.roller_rotation - now.roller_rotation);
-	output_data.compare[0] = pid_roller.get_operation();
+//	output_data.compare[0] = pid_roller.get_operation();
+	output_data.compare[0] = 3000;
 	// 送り
 	static ShotState state = ShotState::STOP;
 	static uint32_t cooling_start;
@@ -221,9 +215,10 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 	pid_angle.update_operation(target.angle_of_turret - now.angle_of_turret);
 	int16_t manual_operation_value = input_data.ctrl.left_handle * 0.3;
 	if (mato_num < 6) {
-		constexpr float ratio = 0.7; // 補正の強さ
-		output_data.compare[3] += pid_angle.get_operation_difference();
-		output_data.compare[3] = output_data.compare[3] * ratio + manual_operation_value * (1-ratio);
+		constexpr float ratio = 0.0; // 補正の強さ
+//		output_data.compare[3] += pid_angle.get_operation_difference();
+		output_data.compare[3] = pid_angle.get_operation();
+		output_data.compare[3] = (int16_t)((float)output_data.compare[3] * ratio + (float)manual_operation_value * (1.0f-ratio));
 		if (mato_num < 3) {
 			output_data.lock_on = 1;
 		}
@@ -248,6 +243,10 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 	}
 	// compare 加速度調整
 	output_data.compare[0] = prev_compare[0] + suppress_value(output_data.compare[0]-prev_compare[0], 1);
+	for (uint8_t i = 2; i < 4; i++) {
+		output_data.compare[i] = prev_compare[i] + suppress_value(output_data.compare[i]-prev_compare[i], 3);
+	}
+
 	prev_game_state = input_data.game_state;
 	prev_compare = output_data.compare;
 
@@ -266,8 +265,8 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
  */
 void ArmoredTrain::update(InputData& input_data, OutputData& output_data) {
 	// SI単位系に変換
-	convert_to_SI(prev_myself, input_data.myself, now.myself);
-	convert_to_SI(prev_enemy, input_data.enemy, now.enemy);
+	cnv_myself.update(input_data.myself, now.myself);
+	cnv_enemy.update(input_data.enemy, now.enemy);
 	/* 未来の位置、および的への角度を計算 */
 //	ここから
 	// 射出時にいる位置を計算

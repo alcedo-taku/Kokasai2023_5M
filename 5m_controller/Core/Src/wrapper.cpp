@@ -9,6 +9,7 @@
  * 宣言部に記載
  */
 
+#include <data_type_can.hpp>
 #include "wrapper.hpp"
 
 /* Pre-Processor Begin */
@@ -20,7 +21,6 @@
 #include "adc.h"
 #include "xbee.hpp"
 #include "PwmSounds.hpp"
-#include "data_type.hpp"
 #include "can_user/can_user.hpp"
 
 //#define XBee_AT_MODE

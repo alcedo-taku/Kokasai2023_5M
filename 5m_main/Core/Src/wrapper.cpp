@@ -1,3 +1,4 @@
+#include <data_type_can.hpp>
 #include "wrapper.hpp"
 
 /* Include Begin */
@@ -8,7 +9,6 @@
 #include "mcp3208.hpp"
 #include <array>
 #include <string.h>
-#include "data_type.hpp"
 /* Include End */
 
 /* Enum Begin */

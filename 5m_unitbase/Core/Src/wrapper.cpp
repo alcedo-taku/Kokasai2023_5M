@@ -20,12 +20,10 @@
 #include "gpio.h"
 #include "HAL_Extension.hpp"
 #include "can_user/can_user.hpp"
-//#include "simple_can_user/simple_can_user.hpp"
 #include "mcp3208.hpp"
 #include <array>
 #include <string.h>
 #include "ArmoredTrain.hpp"
-//#include "data_type.hpp"
 /* Include End */
 
 /* Define Begin */
@@ -267,7 +265,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		encoder_count[1] = encoder[0].getCount();
 		if (!(bool)HAL_GPIO_ReadPin(gpio_pin[2].GPIOx, gpio_pin[2].GPIO_Pin)) {
 //			encoder[0].resetCount();
-			encoder[0].setCount(1.4f/at::RobotStaticData::enc_to_pos_ratio);
+			encoder[0].setCount(1.4f/RobotStaticData::enc_to_pos_ratio);
 		}
 		// 代入
 		input_data.myself.enc_roller_rotation = encoder_count[0];
