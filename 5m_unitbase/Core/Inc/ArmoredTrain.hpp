@@ -49,6 +49,8 @@ private:
 	GameState prev_game_state = GameState::STOP;
 	uint8_t mato_num;
 	uint8_t last_bullet = RobotStaticData::max_bullet;
+	float manual_angle;
+	float prev_manual_angle;
 	// とりあえずここに置く変数
 	float pos_e;
 	float ang_e;
