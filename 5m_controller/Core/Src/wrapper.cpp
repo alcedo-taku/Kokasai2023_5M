@@ -7,6 +7,12 @@
  *
  * GPIO
  * 宣言部に記載
+ *
+ * ADC
+ * PA0:0
+ * PA1:1
+ * PA2:2
+ * PA3:3
  */
 
 #include <data_type_can.hpp>

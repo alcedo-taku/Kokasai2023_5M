@@ -9,6 +9,8 @@
 
 namespace at {
 
+#define IS_ARI 1
+
 /**
  * コンストラクタ
  */
@@ -16,8 +18,27 @@ ArmoredTrain::ArmoredTrain() {
 //	pid_position = aca::PID_controller (pid_parameter_position, frequency);
 }
 
+/**
+ *
+ * @tparam T
+ * @param x
+ * @param in_min
+ * @param in_max
+ * @param out_min
+ * @param out_max
+ * @return
+ */
+template <typename T> T ArmoredTrain::map(T x, T in_min, T in_max, T out_min, T out_max){
+	return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
 
-
+/**
+ *
+ * @tparam T
+ * @param value
+ * @param max_abs_value
+ * @return
+ */
 template <typename T> T ArmoredTrain::suppress_value(T value, T max_abs_value){
 	if (value > max_abs_value) {
 		return max_abs_value;
@@ -220,7 +241,24 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 	if (now.position <= 0 || FieldData::rail_length <= now.position) {
 		output_data.compare[2] = 0;
 	}
-	// 砲塔旋回角度
+	// 砲塔旋回角度, lockon
+#if IS_ARI
+	float manual_angle = map<float>(input_data.ctrl.left_handle, 1000, 2000, 0.8, -0.8);
+	float target_angle;
+	if (mato_num < 6) {
+		constexpr float ratio = 0.0; // 補正の強さ
+		target_angle = target.angle_of_turret * ratio + manual_angle * (1.0f-ratio);
+		output_data.lock_on = 0;
+		if (mato_num < 3) {
+			output_data.lock_on = 1;
+		}
+	}else{
+		target_angle = manual_angle;
+	}
+	pid_angle.update_operation(target_angle - now.angle_of_turret);
+//	output_data.compare[3] += pid_angle.get_operation_difference();
+	output_data.compare[3] = pid_angle.get_operation();
+#else
 	target.angle_of_turret = suppress_value<float>(target.angle_of_turret, RobotStaticData::turret_angle_max);
 	pid_angle.update_operation(target.angle_of_turret - now.angle_of_turret);
 	int16_t manual_operation_value = input_data.ctrl.left_handle * 0.3;
@@ -229,12 +267,14 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 //		output_data.compare[3] += pid_angle.get_operation_difference();
 		output_data.compare[3] = pid_angle.get_operation();
 		output_data.compare[3] = (int16_t)((float)output_data.compare[3] * ratio + (float)manual_operation_value * (1.0f-ratio));
+		output_data.lock_on = 0;
 		if (mato_num < 3) {
 			output_data.lock_on = 1;
 		}
 	}else{
 		output_data.compare[3] = manual_operation_value;
 	}
+#endif
 	// 最大角度の時、出力を正す
 	if (now.angle_of_turret <= -RobotStaticData::turret_angle_max && output_data.compare[3] < 0) {
 		output_data.compare[3] = 0;
