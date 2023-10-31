@@ -101,6 +101,11 @@
 									<listOptionValue builtIn="false" value="STM32F373xC"/>
 									<listOptionValue builtIn="false" value="DEBUG"/>
 									<listOptionValue builtIn="false" value="CONFIG_DISABLE_EX_CALLBACK"/>
+									<listOptionValue builtIn="false" value="CONFIG_DISABLE_MODULE_IWDG"/>
+									<listOptionValue builtIn="false" value="CONFIG_DISABLE_MODULE_ADC"/>
+									<listOptionValue builtIn="false" value="CONFIG_DISABLE_MODULE_I2C"/>
+									<listOptionValue builtIn="false" value="CONFIG_DISABLE_MODULE_UART"/>
+									<listOptionValue builtIn="false" value="CONFIG_DISABLE_MODULE_TIM"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.input.cpp.809127220" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.input.cpp"/>
 							</tool>

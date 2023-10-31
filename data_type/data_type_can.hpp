@@ -55,7 +55,7 @@ struct DataFromCtrlToUnit{
  * unitbase → controller の通信データ
  */
 struct DataFromUnitToCtrl{
-	uint8_t lock_on; //!< 右から 1bit目:locking, 2bit目:locked
+	uint8_t lock_on; 		//!< 右から 1bit目:locking, 2bit目:locked
 	GameState game_state;
 	uint8_t mato;
 };
@@ -65,7 +65,7 @@ struct DataFromUnitToCtrl{
  */
 struct DataFromUnitToUnit{
 	uint8_t debug_count = 0;
-	uint8_t lock_on; //!< 1bit目:locked, 2bit目:lock
+	uint8_t lock_on; 			//!< 1bit目:locked, 2bit目:lock
 	SensorData sensor_data;
 };
 

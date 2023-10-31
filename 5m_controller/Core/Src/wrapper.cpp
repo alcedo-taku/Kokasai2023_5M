@@ -28,6 +28,7 @@
 #include "xbee.hpp"
 #include "PwmSounds.hpp"
 #include "can_user/can_user.hpp"
+#include "HAL_Extension.hpp"
 
 //#define XBee_AT_MODE
 #define XBee_API_MODE 1
@@ -75,19 +76,36 @@ constexpr std::array<GPIO_pin,4> led_pin = {{
 constexpr std::array<GPIO_pin,13> gpio_pin = {{
 	// 回路上の印字と実際の配線が異なるので注意
 	{GPIOA, GPIO_PIN_4},	//  0:pwm スピーカー
-	{GPIOA, GPIO_PIN_5},	//  1:
-	{GPIOA, GPIO_PIN_6},	//  2:
-	{GPIOB, GPIO_PIN_2},	//  3:
-	{GPIOE, GPIO_PIN_8},	//  4:out lock on
-	{GPIOE, GPIO_PIN_9},	//  5:out locked on
-	{GPIOF, GPIO_PIN_1},	//  6:out 的0 LED
-	{GPIOF, GPIO_PIN_0},	//  7:out 的1　LED
-	{GPIOC, GPIO_PIN_15},	//  8:out 的2 LED
+	{GPIOA, GPIO_PIN_5},	//  1:out 的0 LED
+	{GPIOA, GPIO_PIN_6},	//  2:out 的1　LED
+	{GPIOB, GPIO_PIN_2},	//  3:out 的2 LED
+	{GPIOE, GPIO_PIN_8},	//  4:out locked on
+	{GPIOE, GPIO_PIN_9},	//  5:out lock on
+	{GPIOF, GPIO_PIN_1},	//  6:out
+	{GPIOF, GPIO_PIN_0},	//  7:out
+	{GPIOC, GPIO_PIN_15},	//  8:out
 	{GPIOC, GPIO_PIN_14},	//  9:in
 	{GPIOC, GPIO_PIN_13},	// 10:in
 	{GPIOF, GPIO_PIN_6},	// 11:in トリガー
 	{GPIOF, GPIO_PIN_7}		// 12:in コントローラの番号を決める
 }};
+
+std::array<halex::GPIO,13> hal_gpio = {
+		halex::GPIO(GPIOA, GPIO_PIN_4),   //  0:pwm スピーカー
+		halex::GPIO(GPIOA, GPIO_PIN_5),   //  1:out 的0 LED
+		halex::GPIO(GPIOA, GPIO_PIN_6),   //  2:out 的1　LED
+		halex::GPIO(GPIOB, GPIO_PIN_2),   //  3:out 的2 LED
+		halex::GPIO(GPIOE, GPIO_PIN_8),   //  4:out locked on
+		halex::GPIO(GPIOE, GPIO_PIN_9),   //  5:out lock on
+		halex::GPIO(GPIOF, GPIO_PIN_1),   //  6:out
+		halex::GPIO(GPIOF, GPIO_PIN_0),   //  7:out
+		halex::GPIO(GPIOC, GPIO_PIN_15),  //  8:out
+		halex::GPIO(GPIOC, GPIO_PIN_14),  //  9:in
+		halex::GPIO(GPIOC, GPIO_PIN_13),  // 10:in
+		halex::GPIO(GPIOF, GPIO_PIN_6),   // 11:in トリガー
+		halex::GPIO(GPIOF, GPIO_PIN_7),   // 12:in コントローラの番号を決める
+};
+
 Music music_start[8]     = { 	{SoundScale::R, 0},
 								{SoundScale::E4, 250}, {SoundScale::R, 750},
 								{SoundScale::E4, 250}, {SoundScale::R, 750},
@@ -229,6 +247,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		data_to_unit.ctrl_data.left_handle = data.joystick[1];
 		data_to_unit.ctrl_data.is_pulled_trigger = !(bool)HAL_GPIO_ReadPin(gpio_pin[11].GPIOx, gpio_pin[11].GPIO_Pin);
 
+		// 音楽
 		switch (data_from_unit.game_state) {
 			case GameState::STOP:
 				break;
@@ -243,8 +262,15 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 				pwm_sounds.start_sounds();
 				break;
 		}
-
 		pwm_sounds.update_sounds();
+
+		// インジケータ
+		hal_gpio[1].setIf((data_from_unit.mato & 1<<2)>>2);
+		hal_gpio[2].setIf((data_from_unit.mato & 1<<1)>>1);
+		hal_gpio[3].setIf((data_from_unit.mato & 1<<0)>>0);
+		hal_gpio[4].setIf((data_from_unit.lock_on & 1<<1)>>1);
+		hal_gpio[5].setIf((data_from_unit.lock_on & 1<<0)>>0);
+
 
 		// なんかのLED
 		HAL_GPIO_WritePin(led_pin[2].GPIOx, led_pin[2].GPIO_Pin, GPIO_PIN_SET);
