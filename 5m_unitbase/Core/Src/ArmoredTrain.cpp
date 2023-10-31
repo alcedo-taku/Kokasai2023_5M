@@ -210,6 +210,15 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 	}
 	// 横移動
 	output_data.compare[2] = input_data.ctrl.right_handle * 0.8;
+//	if (output_data.compare[2] < 0) {
+//		output_data.compare[2] = suppress_value(output_data.compare[2], std::sqrt(now.position));
+//	}else {
+//		min_distance = FieldData::rail_length - now.position;
+//	}
+//	output_data.compare[2] = output_data.compare[2] *
+	if (now.position <= 0 || FieldData::rail_length <= now.position) {
+		output_data.compare[2] = 0;
+	}
 	// 砲塔旋回角度
 	target.angle_of_turret = suppress_value<float>(target.angle_of_turret, RobotStaticData::turret_angle_max);
 	pid_angle.update_operation(target.angle_of_turret - now.angle_of_turret);
