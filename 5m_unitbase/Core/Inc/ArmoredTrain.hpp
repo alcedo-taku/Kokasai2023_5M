@@ -48,6 +48,7 @@ private:
 	std::array<int16_t, 4> prev_compare = {0,0,0,0};
 	GameState prev_game_state = GameState::STOP;
 	uint8_t mato_num;
+	uint8_t last_bullet = RobotStaticData::max_bullet;
 	// とりあえずここに置く変数
 	float pos_e;
 	float ang_e;

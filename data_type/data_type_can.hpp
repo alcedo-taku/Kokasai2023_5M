@@ -40,6 +40,7 @@ struct DataFromMainToUnit{
 struct DataFromUnitToMain{
 	uint8_t debug_count = 0;
 	uint8_t hit_points; 	//!< 右3bitを使って0,1で格納
+	uint8_t last_bullet;
 };
 
 /**

@@ -81,6 +81,7 @@ struct RobotStaticData {
 	static constexpr float time_lug1 = 0.5;				//!< 射出までにかかる時間[s]
 	static constexpr float turret_angle_max = 40 * M_PI/180; //!< 最大砲塔旋回角度
 	static constexpr float enc_to_pos_ratio = 1.0f / (5120.0f/*PPR*/*4.0f) * 15/*ギヤ数*/ * 6.28f/1000.0f;
+	static constexpr uint8_t max_bullet = 30;
 };
 // todo パラメータ入力しろ
 //RobotStaticData static_data;

@@ -204,6 +204,7 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 		case ShotState::STOP:
 			if (input_data.ctrl.is_pulled_trigger == true) {
 				state = ShotState::SHOTING_0;
+				last_bullet--;
 			}
 			output_data.compare[1] = 0;
 			break;
