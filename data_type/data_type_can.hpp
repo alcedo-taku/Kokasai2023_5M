@@ -56,7 +56,7 @@ struct DataFromCtrlToUnit{
  */
 struct DataFromUnitToCtrl{
 	uint8_t lock_on; 		//!< 右から 1bit目:locking, 2bit目:locked
-	GameState game_state;
+	GameState game_state = GameState::STOP;
 	uint8_t mato;
 };
 

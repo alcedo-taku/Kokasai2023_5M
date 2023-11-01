@@ -430,7 +430,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan){
 	static uint8_t blink_count = 0;
 	blink_count++;
 	if(blink_count == 100){
-//		HAL_GPIO_TogglePin(gpio_pin[5].GPIOx, gpio_pin[5].GPIO_Pin);
+		HAL_GPIO_TogglePin(LED0_GPIO_Port, LED0_Pin);
 		blink_count = 0;
 	}
 }
