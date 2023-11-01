@@ -106,7 +106,10 @@ struct BulletVelocity {
 	float x,y,z;
 };
 
-constexpr uint16_t frequency = 1000;
+/**
+ *
+ */
+constexpr uint16_t frequency = 500;
 
 /**
  * 発射結果等を格納する構造体
