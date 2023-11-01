@@ -186,6 +186,20 @@ uint8_t ArmoredTrain:: judge_mato(std::array<TargetPositionR, 3>& mato, float& a
 }
 
 /**
+ *
+ * @param hit_points_gpio
+ * @param prev_hit_points_gpio
+ * @param hit_points
+ */
+void ArmoredTrain::update_mato(uint8_t& hit_points_gpio, uint8_t& hit_points){
+	for (uint8_t i = 0; i < 3; i++) {
+		if ( (hit_points_gpio & 1<<i) >> i ) {
+			hit_points = hit_points | 1<<i;
+		}
+	}
+}
+
+/**
  * 出力構造体の計算
  * @param now
  * @param target
@@ -303,11 +317,14 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 	prev_compare = output_data.compare;
 
 	/* LED等 */
+	// ロックオン
 	if (mato_num < 3) {
 		output_data.lock_on = 1<<0;
 	}else{
 		output_data.lock_on = 0<<0;
 	}
+	// 的
+	update_mato(input_data.hit_points_gpio, output_data.hit_points);
 }
 
 /**

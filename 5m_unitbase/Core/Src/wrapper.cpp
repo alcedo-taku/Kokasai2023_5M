@@ -56,9 +56,29 @@ constexpr std::array<GPIO_pin,6> gpio_pin = {{
 	{GPIOF, GPIO_PIN_4}, 	// そのunitbaseの番号を決める、ジャンパーあり→0, なし→1
 	{GPIOF, GPIO_PIN_1}, 	// 射出検知
 	{GPIOF, GPIO_PIN_0}, 	// 位置のリセット
-	{GPIOC, GPIO_PIN_13},
-	{GPIOC, GPIO_PIN_14},
-	{GPIOC, GPIO_PIN_15}, 	// 通信確認用LED
+	{GPIOC, GPIO_PIN_13},	// 的0
+	{GPIOC, GPIO_PIN_14},	// 的1
+	{GPIOC, GPIO_PIN_15}, 	// 的2
+}};
+std::array<halex::GPIO,6> hal_gpio = {{
+	// ピン配置：文字を読む方から見て上から順に0-5と番号を振った
+	halex::GPIO(GPIOF, GPIO_PIN_4 ), 	// 0 そのunitbaseの番号を決める、ジャンパーあり→0, なし→1
+	halex::GPIO(GPIOF, GPIO_PIN_1 ), 	// 1 射出検知
+	halex::GPIO(GPIOF, GPIO_PIN_0 ), 	// 2 位置のリセット
+	halex::GPIO(GPIOC, GPIO_PIN_15),	// 3 的0
+	halex::GPIO(GPIOC, GPIO_PIN_14),	// 4 的1
+	halex::GPIO(GPIOC, GPIO_PIN_13), 	// 5 的2
+}};
+
+//LED
+std::array<halex::GPIO,6> hal_led = {{
+	// ピン配置：文字を読む方から見て上から順に0-5と番号を振った
+	halex::GPIO(GPIOC, GPIO_PIN_0 ), 	// 0
+	halex::GPIO(GPIOC, GPIO_PIN_1 ), 	// 1
+	halex::GPIO(GPIOC, GPIO_PIN_2 ), 	// 2
+	halex::GPIO(GPIOC, GPIO_PIN_3),		// 3 的0
+	halex::GPIO(GPIOC, GPIO_PIN_8),		// 4 的1
+	halex::GPIO(GPIOC, GPIO_PIN_9), 	// 5 的2
 }};
 
 // モータ
@@ -115,16 +135,17 @@ DebugValue debug_value;
 
 void init(void){
 	HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_SET);
-	HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET);
-	HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_SET);
-	HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_SET);
-	HAL_GPIO_WritePin(LED4_GPIO_Port, LED4_Pin, GPIO_PIN_SET);
-	HAL_GPIO_WritePin(LED5_GPIO_Port, LED5_Pin, GPIO_PIN_SET);
-	HAL_GPIO_WritePin(LED6_GPIO_Port, LED6_Pin, GPIO_PIN_SET);
-	for (uint8_t i = 3; i < 5; i++) {
-		HAL_GPIO_WritePin(gpio_pin[i].GPIOx, gpio_pin[i].GPIO_Pin, GPIO_PIN_SET);
+	for (uint8_t i = 0; i < 6; i++) {
+		hal_led[i].set();
 	}
 	HAL_Delay(1000);
+	for (uint8_t i = 0; i < 6; i++) {
+		hal_led[i].reset();
+	}
+	HAL_Delay(1000);
+	for (uint8_t i = 3; i < 6; i++) {
+		hal_led[i].set();
+	}
 
 	// unitbase unmber を設定
 	unit_num = (uint8_t)HAL_GPIO_ReadPin(gpio_pin[0].GPIOx, gpio_pin[0].GPIO_Pin);
@@ -163,17 +184,14 @@ void init(void){
 
 
 
-	// タイマー割込み
-	HAL_TIM_Base_Start_IT(&htim16); // メイン処理用
-	HAL_TIM_Base_Start_IT(&htim17); // 通信用
-
-	HAL_GPIO_WritePin(gpio_pin[5].GPIOx, gpio_pin[5].GPIO_Pin, GPIO_PIN_RESET);
-
-
 	debug_count = 0;
 	debug_value.size_of_u2c = sizeof(data_to_ctrl);
 	debug_value.size_of_u2m = sizeof(data_to_main);
 	debug_value.size_of_u2u = sizeof(data_to_unit);
+
+	// タイマー割込み
+	HAL_TIM_Base_Start_IT(&htim16); // メイン処理用
+	HAL_TIM_Base_Start_IT(&htim17); // 通信用
 }
 
 void loop(void){
@@ -191,6 +209,7 @@ void exit_gpio(void) {
 }
 
 uint16_t experiment_timer;
+uint8_t debugmato[3];
 
 /* Function Body Begin */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
@@ -246,8 +265,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		/* from unit */
 		input_data.enemy = data_from_unit.sensor_data;
 
-		/** メイン動作処理 begin **/
-
+		/** 入力 **/
 
 		/* センサーの値の代入 */
 		// adc
@@ -267,6 +285,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 //			encoder[0].resetCount();
 			encoder[0].setCount(1.4f/RobotStaticData::enc_to_pos_ratio);
 		}
+		// リミットスイッチ
+		input_data.hit_points_gpio = 0;
+		input_data.hit_points_gpio = input_data.hit_points_gpio | (uint8_t)!hal_gpio[3].isSet() << 2;
+		input_data.hit_points_gpio = input_data.hit_points_gpio | (uint8_t)!hal_gpio[4].isSet() << 1;
+		input_data.hit_points_gpio = input_data.hit_points_gpio | (uint8_t)!hal_gpio[5].isSet() << 0;
+
 		// 代入
 		input_data.myself.enc_roller_rotation = encoder_count[0];
 		input_data.myself.enc_position = encoder_count[1];
@@ -276,15 +300,19 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		/* 敵ロボットからの情報の代入 */
 		input_data.enemy = data_from_unit.sensor_data;
 
+		/** 演算 **/
 		/* update & 取得 */
 		armored_train.update(input_data, output_data);
 
+		/** 出力 **/
 		/* モータに送る */
 		for(uint8_t i=0; i < motor.size(); i++){
 			motor[i].setSpeed(output_data.compare[i]);
 		}
-		/** メイン動作処理 end **/
-
+		/* LED */
+		hal_led[3].setIf(!(bool)((output_data.hit_points & (1<<2))>>2));
+		hal_led[4].setIf(!(bool)((output_data.hit_points & (1<<1))>>1));
+		hal_led[5].setIf(!(bool)((output_data.hit_points & (1<<0))>>0));
 
 		/** 送信情報を整理 **/
 		/* to controller */
@@ -402,7 +430,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan){
 	static uint8_t blink_count = 0;
 	blink_count++;
 	if(blink_count == 100){
-		HAL_GPIO_TogglePin(gpio_pin[5].GPIOx, gpio_pin[5].GPIO_Pin);
+//		HAL_GPIO_TogglePin(gpio_pin[5].GPIOx, gpio_pin[5].GPIO_Pin);
 		blink_count = 0;
 	}
 }

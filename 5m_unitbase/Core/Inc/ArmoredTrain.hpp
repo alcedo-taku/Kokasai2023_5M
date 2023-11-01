@@ -25,14 +25,16 @@ struct InputData {
 	bool is_pusshed_lounch_reset;
 	ControllerData ctrl;
 	GameState game_state;
+	uint8_t hit_points_gpio = 0; 	//!< 右3bitを使って0,1で格納（0がデフォ、1が打たれたとき）
 };
 
 /**
  * このクラスから出ていく構造体
  */
 struct OutputData {
-	std::array<int16_t, 4> compare; //
-	uint8_t lock_on; // ロックオンできたか
+	std::array<int16_t, 4> compare; //!<
+	uint8_t lock_on; 				//!< ロックオンできたか
+	uint8_t hit_points; 			//!< 右3bitを使って0,1で格納
 };
 
 
@@ -51,6 +53,7 @@ private:
 	uint8_t last_bullet = RobotStaticData::max_bullet;
 	float manual_angle;
 	float prev_manual_angle;
+
 	// とりあえずここに置く変数
 	float pos_e;
 	float ang_e;
@@ -75,6 +78,7 @@ private:
 	void calc_shot(RobotMovementDataSet& movement_data, ShotData& shot_data);
 	void calc_pos_of_mato(RobotMovementDataSet& movement_data, std::array<TargetPositionR, 3>& mato);		//!< 本体の位置から的の位置を計算する
 	uint8_t judge_mato(std::array<TargetPositionR, 3>& mato, float& angle_of_shot);
+	void update_mato(uint8_t& hit_points_gpio, uint8_t& hit_points);
 	void calc_output(RobotMovementData& now, RobotMovementData& target, uint8_t& mato_num, InputData& input_data, OutputData& output_data);
 public:
 	ArmoredTrain();
