@@ -86,7 +86,7 @@ std::array<halex::Motor, 4> motor = {
 		halex::Motor(&htim4,  TIM_CHANNEL_1, &htim4,  TIM_CHANNEL_2), // 0 1 射出
 		halex::Motor(&htim1,  TIM_CHANNEL_1, &htim1,  TIM_CHANNEL_2), // 1 2 送り
 		halex::Motor(&htim8,  TIM_CHANNEL_1, &htim8,  TIM_CHANNEL_2), // 2 3 横移動
-		halex::Motor(&htim15, TIM_CHANNEL_1, &htim15, TIM_CHANNEL_2), // 3 4 旋回
+		halex::Motor(&htim15, TIM_CHANNEL_2, &htim15, TIM_CHANNEL_1), // 3 4 旋回
 };
 
 // エンコーダ
@@ -317,6 +317,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		/** 送信情報を整理 **/
 		/* to controller */
 		data_to_ctrl.lock_on = output_data.lock_on | data_from_unit.lock_on <<1;
+		data_to_ctrl.mato = output_data.hit_points;
 		/* to unit */
 		data_to_unit.sensor_data = input_data.myself;
 		data_to_unit.lock_on = output_data.lock_on;

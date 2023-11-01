@@ -179,7 +179,8 @@ void init(void){
 	HAL_Delay(1000);
 
 //set parameter that relate adc
-	adcCenter[0]  = 2048;
+//	adcCenter[0]  = 1750; // カスメンブレン
+	adcCenter[0]  = 2138; // 青軸 滑ってるやんカス！
 	adcCenter[1]  = 2048;
 	adcCenter[2]  = 2048;
 	adcCenter[3]  = 2048;
@@ -265,12 +266,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		pwm_sounds.update_sounds();
 
 		// インジケータ
-		hal_gpio[1].setIf((data_from_unit.mato & 1<<2)>>2);
-		hal_gpio[2].setIf((data_from_unit.mato & 1<<1)>>1);
-		hal_gpio[3].setIf((data_from_unit.mato & 1<<0)>>0);
+		hal_gpio[1].setIf(!(bool)((data_from_unit.mato & 1<<0)>>0));
+		hal_gpio[2].setIf(!(bool)((data_from_unit.mato & 1<<1)>>1));
+		hal_gpio[3].setIf(!(bool)((data_from_unit.mato & 1<<2)>>2));
 		hal_gpio[4].setIf((data_from_unit.lock_on & 1<<1)>>1);
 		hal_gpio[5].setIf((data_from_unit.lock_on & 1<<0)>>0);
-
 
 		// なんかのLED
 		HAL_GPIO_WritePin(led_pin[2].GPIOx, led_pin[2].GPIO_Pin, GPIO_PIN_SET);
