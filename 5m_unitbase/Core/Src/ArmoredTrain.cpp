@@ -243,7 +243,7 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 	}
 	// 砲塔旋回角度, lockon
 #if IS_ARI
-	manual_angle = map<float>(input_data.ctrl.left_handle, 1000, 2000, 0.8, -0.8);
+	manual_angle = map<float>(input_data.ctrl.left_handle, 1480, 2576, 0.8, -0.8);
 	manual_angle = prev_manual_angle + suppress_value<float>(manual_angle-prev_manual_angle, 0.5);
 	prev_manual_angle = manual_angle;
 	float target_angle;

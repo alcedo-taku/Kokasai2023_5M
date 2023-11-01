@@ -244,7 +244,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		readSW(data.sw);
 		readJoystick(data.joystick);
 		data_to_unit.ctrl_data.right_handle = data.joystick[0];
-		data_to_unit.ctrl_data.left_handle = data.joystick[1];
+		data_to_unit.ctrl_data.left_handle = adcBuf[1];
 		data_to_unit.ctrl_data.is_pulled_trigger = !(bool)HAL_GPIO_ReadPin(gpio_pin[11].GPIOx, gpio_pin[11].GPIO_Pin);
 
 		// 音楽
