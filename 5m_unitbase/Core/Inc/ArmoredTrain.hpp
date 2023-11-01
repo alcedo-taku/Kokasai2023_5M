@@ -41,6 +41,7 @@ struct OutputData {
 class ArmoredTrain {
 private:
 	// 変数
+	bool is_position_reseted = false;
 	RobotMovementDataSet now;
 	RobotMovementDataSet future;
 	RobotMovementData future0_myself;
@@ -83,6 +84,7 @@ private:
 public:
 	ArmoredTrain();
 	void update(InputData& input_data, OutputData& output_data);
+	void reset_position();
 };
 
 } /* namespace at */

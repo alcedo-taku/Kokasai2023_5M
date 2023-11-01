@@ -245,14 +245,22 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 			break;
 	}
 	// 横移動
-	output_data.compare[2] = input_data.ctrl.right_handle * 0.8;
-	output_data.compare[2] = suppress_value<int16_t>(output_data.compare[2], 2000);
-	if (output_data.compare[2] < 0) {
-		output_data.compare[2] = suppress_value<int16_t>(output_data.compare[2], now.position*2000);
-	}else {
-		output_data.compare[2] = suppress_value<int16_t>(output_data.compare[2], (FieldData::rail_length - now.position)*2000);
+	output_data.compare[2] = input_data.ctrl.right_handle * 5;
+	// reset前は最高速度を制限する
+	if (!is_position_reseted) {
+		output_data.compare[2] = suppress_value<int16_t>(output_data.compare[2], 800);
 	}
-	if (now.position <= 0 || FieldData::rail_length <= now.position) {
+	// 最高速度調整
+	output_data.compare[2] = suppress_value<int16_t>(output_data.compare[2], 3000);
+	// 端部での最高速度調整
+	if (output_data.compare[2] < 0) {
+		output_data.compare[2] = suppress_value<int16_t>(output_data.compare[2], now.position*5000+800);
+	}else {
+		output_data.compare[2] = suppress_value<int16_t>(output_data.compare[2], (FieldData::rail_length - now.position)*5000+800);
+	}
+	// 終端で0にする
+	if ((now.position <= 0 && output_data.compare[2] < 0)
+			|| (FieldData::rail_length-0.01 <= now.position && 0 < output_data.compare[2])) {
 		output_data.compare[2] = 0;
 	}
 	// 砲塔旋回角度, lockon
@@ -307,9 +315,9 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 		output_data.compare[i] = suppress_value<int16_t>(output_data.compare[i], 3900);
 	}
 	// compare 加速度調整
-	output_data.compare[0] = prev_compare[0] + suppress_value(output_data.compare[0]-prev_compare[0], 1);
+	output_data.compare[0] = prev_compare[0] + suppress_value(output_data.compare[0]-prev_compare[0], 2);
 	for (uint8_t i = 2; i < 4; i++) {
-		output_data.compare[i] = prev_compare[i] + suppress_value(output_data.compare[i]-prev_compare[i], 3);
+		output_data.compare[i] = prev_compare[i] + suppress_value(output_data.compare[i]-prev_compare[i], 20);
 	}
 
 	prev_game_state = input_data.game_state;
@@ -365,6 +373,10 @@ void ArmoredTrain::update(InputData& input_data, OutputData& output_data) {
 
 	// pid等の処理をする
 	calc_output(now.myself, target, mato_num, input_data, output_data);
+}
+
+void ArmoredTrain::reset_position(){
+	is_position_reseted = true;
 }
 
 } /* namespace at */
