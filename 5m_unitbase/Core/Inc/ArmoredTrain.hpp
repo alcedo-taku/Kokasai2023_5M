@@ -53,7 +53,7 @@ private:
 	uint8_t last_bullet = RobotStaticData::max_bullet;
 	float manual_angle;
 	float prev_manual_angle;
-
+	float target_angle;
 	// とりあえずここに置く変数
 	float pos_e;
 	float ang_e;
@@ -64,7 +64,7 @@ private:
 	// pidクラス
 	aca::PID_Element pid_parameter_position = {5,0,0};
 	aca::PID_controller pid_position = aca::PID_controller (pid_parameter_position, frequency);
-	aca::PID_Element pid_parameter_angle {10000,0,0};
+	aca::PID_Element pid_parameter_angle {1000,0,0};
 	aca::PID_controller pid_angle = aca::PID_controller (pid_parameter_angle, frequency);
 	aca::PID_Element pid_parameter_roller {2,0,0};
 	aca::PID_controller pid_roller = aca::PID_controller (pid_parameter_roller, frequency);

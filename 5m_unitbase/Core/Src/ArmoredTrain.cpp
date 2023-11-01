@@ -51,7 +51,7 @@ template <typename T> T ArmoredTrain::suppress_value(T value, T max_abs_value){
 
 
 /**
- * センサーの入力を、SI単位系に変換する関数
+ * センサーの入力を、SI単位系に変換する関数　別のところへ移行した
  * @param sensor_data
  * @param movement_data
  */
@@ -257,10 +257,9 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 	}
 	// 砲塔旋回角度, lockon
 #if IS_ARI
-	manual_angle = map<float>(input_data.ctrl.left_handle, 1480, 2576, 0.8, -0.8);
+	manual_angle = map<float>(input_data.ctrl.left_handle, 1480, 2585, 0.8, -0.8);
 	manual_angle = prev_manual_angle + suppress_value<float>(manual_angle-prev_manual_angle, 0.5);
 	prev_manual_angle = manual_angle;
-	float target_angle;
 	if (mato_num < 6) {
 		constexpr float ratio = 0.0; // 補正の強さ
 		target_angle = target.angle_of_turret * ratio + manual_angle * (1.0f-ratio);
