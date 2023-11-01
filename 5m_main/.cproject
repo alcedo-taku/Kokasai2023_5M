@@ -89,6 +89,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/kokasai2023_5m/CAN_library}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/kokasai2023_5m/MCP3208_reader}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/kokasai2023_5m/data_type}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/kokasai2023_5m/LED_Driver_TM1640/src}&quot;"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.input.cpp.876324367" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.input.cpp"/>
 							</tool>
@@ -111,12 +112,13 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="data_type"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="MCP3208_reader"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="HAL_Extension"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="CAN_library"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="HAL_Extension"/>
+						<entry excluding="src/" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="LED_Driver_TM1640"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="MCP3208_reader"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="data_type"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

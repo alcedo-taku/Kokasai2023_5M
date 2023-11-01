@@ -9,6 +9,7 @@
 #include "mcp3208.hpp"
 #include <array>
 #include <string.h>
+#include <TM1640.hpp>
 /* Include End */
 
 /* Enum Begin */

@@ -42,6 +42,11 @@
 			<location>C:/user_file/STM32CubeIDE_workspase/2023/kokasai2023_5m/HAL_Extension</location>
 		</link>
 		<link>
+			<name>LED_Driver_TM1640</name>
+			<type>2</type>
+			<location>C:/user_file/STM32CubeIDE_workspase/2023/kokasai2023_5m/LED_Driver_TM1640</location>
+		</link>
+		<link>
 			<name>MCP3208_reader</name>
 			<type>2</type>
 			<location>C:/user_file/STM32CubeIDE_workspase/2023/kokasai2023_5m/MCP3208_reader</location>

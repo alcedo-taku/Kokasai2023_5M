@@ -13,3 +13,6 @@
 [submodule "Automatic_Control_Assistant"]
 	path = Automatic_Control_Assistant
 	url = https://gitlab.com/grcc/library/automatic_control_assistant.git
+[submodule "LED_Driver_TM1640"]
+	path = LED_Driver_TM1640
+	url = https://gitlab.com/alcedo-taku/led_driver-tm1640.git
