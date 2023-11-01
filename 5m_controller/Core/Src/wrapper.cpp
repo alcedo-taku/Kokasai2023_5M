@@ -180,7 +180,8 @@ void init(void){
 
 //set parameter that relate adc
 //	adcCenter[0]  = 1750; // カスメンブレン
-	adcCenter[0]  = 2138; // 青軸 滑ってるやんカス！
+//	adcCenter[0]  = 2138; // 青軸 滑ってるやんカス！
+	adcCenter[0]  = 2048; // ジョイスティック
 	adcCenter[1]  = 2048;
 	adcCenter[2]  = 2048;
 	adcCenter[3]  = 2048;
