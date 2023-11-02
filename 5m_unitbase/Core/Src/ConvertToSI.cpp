@@ -38,7 +38,7 @@ void ConvertToSI::update(SensorData& sensor_data, RobotMovementData& movement_da
 	for (uint8_t i = 0; i < 50; i++) {
 		debug[i] = angle_buf[i];
 	}
-	angle_buf[0] = map<float>((float)sensor_data.pot_angle_of_turret, 22216.0f, 13120.0f, -max_angle, max_angle);
+	angle_buf[0] = map<float>((float)sensor_data.pot_angle_of_turret, 20600.0f, 11900.0f, max_angle, -max_angle);
 	//	angle[angle_div] = map<float>((float)sensor_data.pot_angle_of_turret, 21350.0f, 12330.0f, -max_angle, max_angle);
 	movement_data.angle_of_turret 			 = angle_buf.sum() / 50.0f;
 
