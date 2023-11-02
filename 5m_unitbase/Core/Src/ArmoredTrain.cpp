@@ -239,7 +239,7 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 		case ShotState::STOP:
 			if (input_data.ctrl.is_pulled_trigger == true) {
 				state = ShotState::SHOTING_0;
-				last_bullet--;
+				output_data.last_bullet--;
 			}
 			output_data.compare[1] = 0;
 			break;
@@ -377,6 +377,16 @@ void ArmoredTrain::update(InputData& input_data, OutputData& output_data) {
 
 	// pid等の処理をする
 	calc_output(now.myself, target, mato_num, input_data, output_data);
+
+	// debug mode ではローラーの回転を止める
+	if (input_data.game_state == GameState::DEBUGING) {
+		output_data.compare[0] = 0;
+	}else {
+		if (prev_game_state == GameState::DEBUGING) {
+			output_data.last_bullet = RobotStaticData::max_bullet;
+		}
+	}
+
 }
 
 void ArmoredTrain::reset_position(){

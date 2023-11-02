@@ -37,7 +37,7 @@ constexpr std::array<GPIO_pin,10> LED = {{
 //GPIO
 constexpr std::array<GPIO_pin,10> gpio = {{
 	{G1_GPIO_Port, G1_Pin}, 	// スタート/ストップ
-	{G2_GPIO_Port, G2_Pin}, 	// リセット
+	{G2_GPIO_Port, G2_Pin}, 	// デバッグモードか否か
 	{G3_GPIO_Port, G3_Pin},
 	{G4_GPIO_Port, G4_Pin},
 	{G5_GPIO_Port, G5_Pin},
@@ -46,6 +46,18 @@ constexpr std::array<GPIO_pin,10> gpio = {{
 	{G8_GPIO_Port, G8_Pin},
 	{G9_GPIO_Port, G9_Pin},
 	{G10_GPIO_Port, G10_Pin}
+}};
+std::array<halex::GPIO,10> hal_gpio = {{
+	halex::GPIO(G1_GPIO_Port, G1_Pin), 	// スタート/ストップ
+	halex::GPIO(G2_GPIO_Port, G2_Pin), 	// デバッグモードか否か
+	halex::GPIO(G3_GPIO_Port, G3_Pin),
+	halex::GPIO(G4_GPIO_Port, G4_Pin),
+	halex::GPIO(G5_GPIO_Port, G5_Pin),
+	halex::GPIO(G6_GPIO_Port, G6_Pin),
+	halex::GPIO(G7_GPIO_Port, G7_Pin),
+	halex::GPIO(G8_GPIO_Port, G8_Pin),
+	halex::GPIO(G9_GPIO_Port, G9_Pin),
+	halex::GPIO(G10_GPIO_Port, G10_Pin)
 }};
 //非常停止
 constexpr std::array<GPIO_pin,2> EMG = {{
@@ -153,6 +165,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		// スタートストップ
 		static uint32_t start_time;
 		static uint32_t end_time;
+		if (hal_gpio[1].isReset()) {
+			data_to_unit.game_state = GameState::DEBUGING;
+		}else {
+			if (data_to_unit.game_state == GameState::DEBUGING) {
+				data_to_unit.game_state = GameState::STOP;
+			}
+		}
 		switch (data_to_unit.game_state) {
 			case GameState::STOP:
 				if ( !(bool)HAL_GPIO_ReadPin(gpio[0].GPIOx, gpio[0].GPIO_Pin) ) {
@@ -231,7 +250,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan){
 			case CanId::unit0_to_main:
 				memcpy(&data_from_unit,&buf,sizeof(data_from_unit));
 				emg_count[0] = 0;
-				if (data_to_unit.game_state == GameState::START || data_to_unit.game_state == GameState::END_READY) {
+				if (data_to_unit.game_state == GameState::START || data_to_unit.game_state == GameState::END_READY || data_to_unit.game_state == GameState::DEBUGING) {
 					HAL_GPIO_WritePin(EMG[0].GPIOx, EMG[0].GPIO_Pin, GPIO_PIN_SET);
 				}else{
 					HAL_GPIO_WritePin(EMG[0].GPIOx, EMG[0].GPIO_Pin, GPIO_PIN_RESET);
@@ -240,7 +259,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan){
 			case CanId::unit1_to_main:
 				memcpy(&data_from_unit1, &buf, sizeof(data_from_unit1));
 				emg_count[1] = 0;
-				if (data_to_unit.game_state == GameState::START || data_to_unit.game_state == GameState::END_READY) {
+				if (data_to_unit.game_state == GameState::START || data_to_unit.game_state == GameState::END_READY || data_to_unit.game_state == GameState::DEBUGING) {
 					HAL_GPIO_WritePin(EMG[1].GPIOx, EMG[1].GPIO_Pin, GPIO_PIN_SET);
 				}else{
 					HAL_GPIO_WritePin(EMG[1].GPIOx, EMG[1].GPIO_Pin, GPIO_PIN_RESET);

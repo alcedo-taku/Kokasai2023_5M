@@ -35,6 +35,7 @@ struct OutputData {
 	std::array<int16_t, 4> compare; //!<
 	uint8_t lock_on; 				//!< ロックオンできたか
 	uint8_t hit_points; 			//!< 右3bitを使って0,1で格納
+	uint8_t last_bullet = RobotStaticData::max_bullet;
 };
 
 
@@ -51,7 +52,6 @@ private:
 	std::array<int16_t, 4> prev_compare = {0,0,0,0};
 	GameState prev_game_state = GameState::STOP;
 	uint8_t mato_num;
-	uint8_t last_bullet = RobotStaticData::max_bullet;
 	float manual_angle;
 	float prev_manual_angle;
 	float target_angle;

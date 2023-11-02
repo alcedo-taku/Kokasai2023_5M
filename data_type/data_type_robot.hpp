@@ -135,6 +135,7 @@ enum class GameState : uint8_t{
 	START,		//! スタート
 	END_READY,	//! 停止5秒前
 	STOP, 		//! 停止
+	DEBUGING,   //! 射撃が回らないデバッグモード
 };
 /** enum **/
 
