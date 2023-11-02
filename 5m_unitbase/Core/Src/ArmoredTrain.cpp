@@ -208,12 +208,12 @@ void ArmoredTrain::update_mato(uint8_t& hit_points_gpio, uint8_t& hit_points){
  * @param output_data
  */
 void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target, uint8_t& mato_num, InputData& input_data, OutputData& output_data){
-	/* motor */
-	// 射出
+	/** motor **/
+	/* 射出 */
 	pid_roller.update_operation(target.roller_rotation - now.roller_rotation);
 //	output_data.compare[0] = pid_roller.get_operation();
 	output_data.compare[0] = 3000;
-	// 送り
+	/* 送り */
 	static ShotState state = ShotState::STOP;
 	static uint32_t cooling_start;
 	switch (state) {
@@ -244,7 +244,7 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 			output_data.compare[1] = 0;
 			break;
 	}
-	// 横移動
+	/* 横移動 */
 	output_data.compare[2] = input_data.ctrl.right_handle * 5;
 	// reset前は最高速度を制限する
 	if (!is_position_reseted) {
@@ -262,11 +262,12 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 	if ((now.position <= 0 && output_data.compare[2] < 0)
 			|| (FieldData::rail_length-0.01 <= now.position && 0 < output_data.compare[2])) {
 		output_data.compare[2] = 0;
+		prev_compare[2] = 0;
 	}
-	// 砲塔旋回角度, lockon
+	/* 砲塔旋回角度, lockon */
 #if IS_ARI
 	manual_angle = map<float>(input_data.ctrl.left_handle, 1480, 2585, 0.8, -0.8);
-	manual_angle = prev_manual_angle + suppress_value<float>(manual_angle-prev_manual_angle, 0.5);
+	manual_angle = prev_manual_angle + suppress_value<float>(manual_angle-prev_manual_angle, 0.0005); // ここはおけ
 	prev_manual_angle = manual_angle;
 	if (mato_num < 6) {
 		constexpr float ratio = 0.0; // 補正の強さ
@@ -278,6 +279,9 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 	}else{
 		target_angle = manual_angle;
 	}
+	// 現在角度と目標角度の差を制限する
+	target_angle = now.angle_of_turret + suppress_value<float>(target_angle - now.angle_of_turret, 0.1);
+	// PID
 	pid_angle.update_operation(target_angle - now.angle_of_turret);
 //	output_data.compare[3] += pid_angle.get_operation_difference();
 	output_data.compare[3] = pid_angle.get_operation();
@@ -299,12 +303,13 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 	}
 #endif
 	// 最大角度の時、出力を正す
-	if (now.angle_of_turret <= -RobotStaticData::turret_angle_max && output_data.compare[3] < 0) {
+	if ((now.angle_of_turret <= -RobotStaticData::turret_angle_max && output_data.compare[3] < 0)
+			|| (RobotStaticData::turret_angle_max <= now.angle_of_turret && output_data.compare[3] > 0)){
 		output_data.compare[3] = 0;
-	}else if(RobotStaticData::turret_angle_max <= now.angle_of_turret && output_data.compare[3] > 0){
-		output_data.compare[3] = 0;
+		prev_compare[3] = 0;
 	}
 
+	/* モータ共通 */
 	for (uint8_t i = 0; i < 4; i++) {
 		// compare STARTの時に0にする
 		if (prev_game_state == GameState::READY && input_data.game_state == GameState::START) {
@@ -316,14 +321,13 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 	}
 	// compare 加速度調整
 	output_data.compare[0] = prev_compare[0] + suppress_value(output_data.compare[0]-prev_compare[0], 2);
-	for (uint8_t i = 2; i < 4; i++) {
-		output_data.compare[i] = prev_compare[i] + suppress_value(output_data.compare[i]-prev_compare[i], 20);
-	}
+	output_data.compare[2] = prev_compare[2] + suppress_value(output_data.compare[2]-prev_compare[2], 20);
+	output_data.compare[3] = prev_compare[3] + suppress_value(output_data.compare[3]-prev_compare[3], 40);
 
 	prev_game_state = input_data.game_state;
 	prev_compare = output_data.compare;
 
-	/* LED等 */
+	/** LED等 **/
 	// ロックオン
 	if (mato_num < 3) {
 		output_data.lock_on = 1<<0;
