@@ -39,11 +39,19 @@ template <typename T> T ArmoredTrain::map(T x, T in_min, T in_max, T out_min, T 
  * @param max_abs_value
  * @return
  */
-template <typename T> T ArmoredTrain::suppress_value(T value, T max_abs_value){
+template <typename T> T ArmoredTrain::suppress_abs(T value, T max_abs_value){
 	if (value > max_abs_value) {
 		return max_abs_value;
 	}else if (value < - max_abs_value) {
 		return - max_abs_value;
+	}else {
+		return value;
+	}
+}
+
+template <typename T> T ArmoredTrain::suppress_stole(T value, T min_value){
+	if (-min_value < value || value < min_value) {
+		return 0;
 	}else {
 		return value;
 	}
@@ -245,18 +253,18 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 			break;
 	}
 	/* 横移動 */
-	output_data.compare[2] = suppress_value<int16_t>(input_data.ctrl.right_handle, 120) * 20;
+	output_data.compare[2] = suppress_abs<int16_t>(input_data.ctrl.right_handle, 120) * 20;
 	// reset前は最高速度を制限する
 	if (!is_position_reseted) {
-		output_data.compare[2] = suppress_value<int16_t>(output_data.compare[2], 800);
+		output_data.compare[2] = suppress_abs<int16_t>(output_data.compare[2], 800);
 	}
 	// 最高速度調整
-	output_data.compare[2] = suppress_value<int16_t>(output_data.compare[2], 3000);
+	output_data.compare[2] = suppress_abs<int16_t>(output_data.compare[2], 3000);
 	// 端部での最高速度調整
 	if (output_data.compare[2] < 0) {
-		output_data.compare[2] = suppress_value<int16_t>(output_data.compare[2], now.position*5000+800);
+		output_data.compare[2] = suppress_abs<int16_t>(output_data.compare[2], now.position*5000+800);
 	}else {
-		output_data.compare[2] = suppress_value<int16_t>(output_data.compare[2], (FieldData::rail_length - now.position)*5000+800);
+		output_data.compare[2] = suppress_abs<int16_t>(output_data.compare[2], (FieldData::rail_length - now.position)*5000+800);
 	}
 	// 終端で0にする
 	if ((now.position <= 0 && output_data.compare[2] < 0)
@@ -267,7 +275,7 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 	/* 砲塔旋回角度, lockon */
 #if IS_ARI
 	manual_angle = map<float>(input_data.ctrl.left_handle, 1480, 2585, 0.8, -0.8);
-	manual_angle = prev_manual_angle + suppress_value<float>(manual_angle-prev_manual_angle, 0.002); // ここはおけ
+	manual_angle = prev_manual_angle + suppress_abs<float>(manual_angle-prev_manual_angle, 0.002); // ここはおけ
 	prev_manual_angle = manual_angle;
 	if (mato_num < 6) {
 		constexpr float ratio = 0.0; // 補正の強さ
@@ -280,7 +288,7 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 		target_angle = manual_angle;
 	}
 	// 現在角度と目標角度の差を制限する
-	target_angle = now.angle_of_turret + suppress_value<float>(target_angle - now.angle_of_turret, 0.1);
+	target_angle = now.angle_of_turret + suppress_abs<float>(target_angle - now.angle_of_turret, 0.1);
 	// PID
 	pid_angle.update_operation(target_angle - now.angle_of_turret);
 //	output_data.compare[3] += pid_angle.get_operation_difference();
@@ -290,7 +298,7 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 		output_data.compare[3]*=0.6;
 	}
 #else
-	target.angle_of_turret = suppress_value<float>(target.angle_of_turret, RobotStaticData::turret_angle_max);
+	target.angle_of_turret = suppress_abs<float>(target.angle_of_turret, RobotStaticData::turret_angle_max);
 	pid_angle.update_operation(target.angle_of_turret - now.angle_of_turret);
 	int16_t manual_operation_value = input_data.ctrl.left_handle * 0.3;
 	if (mato_num < 6) {
@@ -321,12 +329,14 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 			prev_compare[i] = 0;
 		}
 		// compare 上限調整
-		output_data.compare[i] = suppress_value<int16_t>(output_data.compare[i], 3900);
+		output_data.compare[i] = suppress_abs<int16_t>(output_data.compare[i], 3900);
+		// compare 最低値調整
+		output_data.compare[i] = suppress_stole<int16_t>(output_data.compare[i], 500);
 	}
 	// compare 加速度調整
-	output_data.compare[0] = prev_compare[0] + suppress_value(output_data.compare[0]-prev_compare[0], 2);
-	output_data.compare[2] = prev_compare[2] + suppress_value(output_data.compare[2]-prev_compare[2], 20);
-	output_data.compare[3] = prev_compare[3] + suppress_value(output_data.compare[3]-prev_compare[3], 40);
+	output_data.compare[0] = prev_compare[0] + suppress_abs(output_data.compare[0]-prev_compare[0], 2);
+	output_data.compare[2] = prev_compare[2] + suppress_abs(output_data.compare[2]-prev_compare[2], 20);
+	output_data.compare[3] = prev_compare[3] + suppress_abs(output_data.compare[3]-prev_compare[3], 40);
 
 	prev_game_state = input_data.game_state;
 	prev_compare = output_data.compare;

@@ -72,7 +72,8 @@ private:
 	aca::PID_controller pid_roller = aca::PID_controller (pid_parameter_roller, frequency);
 	// 関数
 	template <typename T> T map(T x, T in_min, T in_max, T out_min, T out_max);
-	template <typename T> T suppress_value(T value, T max_abs_value);
+	template <typename T> T suppress_abs(T value, T max_abs_value);
+	template <typename T> T suppress_stole(T value, T min_value);
 	void convert_to_SI(SensorData& prev_sensor_data, SensorData& sensor_data, RobotMovementData& movement_data);
 	void calc_initial_velocity(RobotMovementData& movement_data, BulletVelocity& bullet_velocity);	//!< 砲弾の初速度を求める 運動学　いらない
 	void calc_roller_rotation();
