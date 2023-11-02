@@ -245,7 +245,7 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 			break;
 	}
 	/* 横移動 */
-	output_data.compare[2] = input_data.ctrl.right_handle * 5;
+	output_data.compare[2] = suppress_value<int16_t>(input_data.ctrl.right_handle, 120) * 20;
 	// reset前は最高速度を制限する
 	if (!is_position_reseted) {
 		output_data.compare[2] = suppress_value<int16_t>(output_data.compare[2], 800);
@@ -267,7 +267,7 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 	/* 砲塔旋回角度, lockon */
 #if IS_ARI
 	manual_angle = map<float>(input_data.ctrl.left_handle, 1480, 2585, 0.8, -0.8);
-	manual_angle = prev_manual_angle + suppress_value<float>(manual_angle-prev_manual_angle, 0.0005); // ここはおけ
+	manual_angle = prev_manual_angle + suppress_value<float>(manual_angle-prev_manual_angle, 0.002); // ここはおけ
 	prev_manual_angle = manual_angle;
 	if (mato_num < 6) {
 		constexpr float ratio = 0.0; // 補正の強さ
@@ -285,6 +285,10 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 	pid_angle.update_operation(target_angle - now.angle_of_turret);
 //	output_data.compare[3] += pid_angle.get_operation_difference();
 	output_data.compare[3] = pid_angle.get_operation();
+	// ばねがかかっていることによる値の修正
+	if (target_angle - now.angle_of_turret < 0) {
+		output_data.compare[3]*=0.6;
+	}
 #else
 	target.angle_of_turret = suppress_value<float>(target.angle_of_turret, RobotStaticData::turret_angle_max);
 	pid_angle.update_operation(target.angle_of_turret - now.angle_of_turret);
