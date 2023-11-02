@@ -212,7 +212,7 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 	/* 射出 */
 	pid_roller.update_operation(target.roller_rotation - now.roller_rotation);
 //	output_data.compare[0] = pid_roller.get_operation();
-	output_data.compare[0] = 3000;
+	output_data.compare[0] = 2000;
 	/* 送り */
 	static ShotState state = ShotState::STOP;
 	static uint32_t cooling_start;
