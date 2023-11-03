@@ -40,7 +40,7 @@ struct RobotStaticData {
 // todo パラメータ入力しろ
 //RobotStaticData static_data;
 
-#define ID 1
+#define ID 2
 #if ID == 0
 // 0
 struct RobotUniquData
@@ -59,6 +59,12 @@ struct RobotUniquData {
 };
 #elif ID == 2
 // 2
+struct RobotUniquData {
+	static constexpr aca::PID_Element pid_parameter_position = {5,0,0};
+	static constexpr aca::PID_Element pid_parameter_angle {7500,0,0};
+	static constexpr float bane_rate = 0.15;
+	static constexpr aca::PID_Element pid_parameter_roller {2,0,0};
+};
 #elif ID == 3
 // 3
 #endif

@@ -179,8 +179,9 @@ void init(void){
 	HAL_Delay(1000);
 
 //set parameter that relate adc
-//	adcCenter[0]  = 1820; // カスメンブレン
-	adcCenter[0]  = 1900; // 青軸 滑ってるやんカス！
+//	adcCenter[0]  = 1820; // 0カスメンブレン
+//	adcCenter[0]  = 1900; // 1青軸
+	adcCenter[0]  = 1950; // 2
 //	adcCenter[0]  = 2670; // ジョイスティック
 	adcCenter[1]  = 2048;
 	adcCenter[2]  = 2048;

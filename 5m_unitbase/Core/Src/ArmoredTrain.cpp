@@ -258,6 +258,12 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 			break;
 	}
 	/* 横移動 */
+#if ID == 2
+	if (input_data.ctrl.right_handle < 0) {
+		input_data.ctrl.right_handle *= 2;
+	}
+	input_data.ctrl.right_handle *= -1;
+#endif
 	output_data.compare[2] = suppress_abs<int16_t>(input_data.ctrl.right_handle, 120) * 20;
 	// reset前は最高速度を制限する
 	if (!is_position_reseted) {
