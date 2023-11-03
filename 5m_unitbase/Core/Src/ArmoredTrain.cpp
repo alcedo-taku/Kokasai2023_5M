@@ -222,31 +222,29 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 //	output_data.compare[0] = pid_roller.get_operation();
 	output_data.compare[0] = 2000;
 	/* 送り */
-	static ShotState state = ShotState::STOP;
-	static uint32_t cooling_start;
-	switch (state) {
+	switch (shot_state) {
 		case ShotState::SHOTING_0:
 			if (input_data.is_pusshed_lounch_reset == false) {
-				state = ShotState::SHOTING_1;
+				shot_state = ShotState::SHOTING_1;
 			}
 			output_data.compare[1] = 2000;
 			break;
 		case ShotState::SHOTING_1:
 			if (input_data.is_pusshed_lounch_reset == true) {
-				state = ShotState::COOLING_TIME;
+				shot_state = ShotState::COOLING_TIME;
 				cooling_start = HAL_GetTick();
 			}
 			output_data.compare[1] = 2000;
 			break;
 		case ShotState::COOLING_TIME:
 			if (cooling_start + cooling_time <= HAL_GetTick()) {
-				state = ShotState::STOP;
+				shot_state = ShotState::STOP;
 			}
 			output_data.compare[1] = 0;
 			break;
 		case ShotState::STOP:
 			if (input_data.ctrl.is_pulled_trigger == true) {
-				state = ShotState::SHOTING_0;
+				shot_state = ShotState::SHOTING_0;
 				output_data.last_bullet--;
 			}
 			output_data.compare[1] = 0;
@@ -295,7 +293,9 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 	output_data.compare[3] = pid_angle.get_operation();
 	// ばねがかかっていることによる値の修正
 	if (target_angle - now.angle_of_turret > 0) {
-		output_data.compare[3]*=1.66;
+		output_data.compare[3]*=1 + (now.angle_of_turret + 0.9)*RobotUniquData::bane_rate;
+	}else {
+		output_data.compare[3]*=1 - (now.angle_of_turret + 0.9)*RobotUniquData::bane_rate;
 	}
 #else
 	target.angle_of_turret = suppress_abs<float>(target.angle_of_turret, RobotStaticData::turret_angle_max);
@@ -392,7 +392,22 @@ void ArmoredTrain::update(InputData& input_data, OutputData& output_data) {
 	// pid等の処理をする
 	calc_output(now.myself, target, mato_num, input_data, output_data);
 
-	// debug mode ではローラーの回転を止める
+	// mode により細かい値の修正
+	switch (input_data.game_state) {
+		case GameState::DEBUGING:
+			cooling_time = 300;
+			output_data.compare[0] = 800;
+			output_data.last_bullet = RobotStaticData::max_bullet;
+			break;
+		default:
+			cooling_time = 1000;
+			if (prev_game_state == GameState::DEBUGING) {
+			}
+			break;
+		case GameState::READY:
+			shot_state = ShotState::STOP;
+			break;
+	}
 	if (input_data.game_state == GameState::DEBUGING) {
 		cooling_time = 300;
 		output_data.compare[0] = 800;

@@ -57,6 +57,8 @@ private:
 	float prev_manual_angle;
 	float target_angle;
 	uint16_t cooling_time = 1000; // [ms]
+	ShotState shot_state = ShotState::STOP;
+	uint32_t cooling_start;
 	// とりあえずここに置く変数
 	float pos_e;
 	float ang_e;
