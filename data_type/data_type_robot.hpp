@@ -6,10 +6,6 @@
 #include "main.h"
 #include <cmath>
 
-//constexpr uint8_t MAIN_ADDRESS = 01;
-//constexpr uint8_t ACTR_ADDRESS = 02;
-//constexpr uint64_t TARGET_XBee_ADDRESS = 0x0013A2004198443F; // 運転段階用
-
 /** 便利な構造体 **/
 struct GPIO_pin {
     GPIO_TypeDef* GPIOx;
@@ -51,40 +47,11 @@ struct RobotMovementData {
 };
 
 /**
- * フィールドの寸法等を格納する構造体
- */
-struct FieldData{
-	static constexpr float opposing_distance = 3;		//!< 対向距離()[m]
-	static constexpr float rail_length = 1.4 - 0.012*2;	//!< 横移動可能長さ[m]
-	static constexpr float gravity = 9.8;				//!< 重力加速度[m/s]
-};
-
-/**
  * ロボット上の的の位置を格納する構造体
  */
 struct TargetPosition {
 	float x,y,angle;
 };
-
-/**
- * ロボットの静的な情報を格納する構造体
- */
-struct RobotStaticData {
-	static constexpr float angle_of_depression = 2 * M_PI/180;	//!< 砲塔俯角[rad]
-	static constexpr float turret_length = 0.050;				//!< 旋回中心から速度計側部までの距離[m] (l0)
-	static constexpr float radius_of_roller = 0.0245;			//!< ローラー半径[m]
-	static constexpr std::array<TargetPosition, 3> mato = {{	//!< ロボット内座標
-			{-0.010, 0.0, 0},
-			{0.0, 0.010, 0},
-			{0.010, 0.0, 0},
-	}};
-	static constexpr float time_lug1 = 0.5;				//!< 射出までにかかる時間[s]
-	static constexpr float turret_angle_max = 0.5;//40 * M_PI/180; //!< 最大砲塔旋回角度
-	static constexpr float enc_to_pos_ratio = 1.0f / (5120.0f/*PPR*/*4.0f) * 15/*ギヤ数*/ * 6.28f/1000.0f;
-	static constexpr uint8_t max_bullet = 30;
-};
-// todo パラメータ入力しろ
-//RobotStaticData static_data;
 
 /**
  * 自分からの相対座標系での敵の的の角度
@@ -105,11 +72,6 @@ struct RobotMovementDataSet {
 struct BulletVelocity {
 	float x,y,z;
 };
-
-/**
- *
- */
-constexpr uint16_t frequency = 500;
 
 /**
  * 発射結果等を格納する構造体

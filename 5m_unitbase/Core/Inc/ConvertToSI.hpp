@@ -9,6 +9,7 @@
 #define SRC_CONVERTTOSI_HPP_
 
 #include "data_type_robot.hpp"
+#include "data_parameter.hpp"
 #include <valarray>
 #include <iostream>
 #include <valarray>

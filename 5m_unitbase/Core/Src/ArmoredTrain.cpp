@@ -402,7 +402,6 @@ void ArmoredTrain::update(InputData& input_data, OutputData& output_data) {
 		if (prev_game_state == GameState::DEBUGING) {
 		}
 	}
-
 }
 
 void ArmoredTrain::reset_position(){
