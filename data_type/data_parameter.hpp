@@ -5,6 +5,7 @@
 #include <cstdint>
 #include "main.h"
 #include <cmath>
+#include "Automatic_Control_Assistant.hpp"
 
 //constexpr uint8_t MAIN_ADDRESS = 01;
 //constexpr uint8_t ACTR_ADDRESS = 02;
@@ -38,6 +39,27 @@ struct RobotStaticData {
 };
 // todo パラメータ入力しろ
 //RobotStaticData static_data;
+
+#define ID 1
+#if ID == 0
+// 0
+struct RobotUniquData
+	static constexpr aca::PID_Element pid_parameter_position = {5,0,0};
+	static constexpr aca::PID_Element pid_parameter_angle {7000,200,200};
+	static constexpr aca::PID_Element pid_parameter_roller {2,0,0};
+};
+#elif ID == 1
+// 1
+struct RobotUniquData {
+	static constexpr aca::PID_Element pid_parameter_position = {5,0,0};
+	static constexpr aca::PID_Element pid_parameter_angle {12000,0,0};
+	static constexpr aca::PID_Element pid_parameter_roller {2,0,0};
+};
+#elif ID == 2
+// 2
+#elif ID == 3
+// 3
+#endif
 
 constexpr uint16_t frequency = 500;
 
