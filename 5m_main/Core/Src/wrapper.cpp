@@ -173,6 +173,18 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		switch (data_to_unit.game_state) {
 			case GameState::STOP:
 				if ( !(bool)HAL_GPIO_ReadPin(gpio[0].GPIOx, gpio[0].GPIO_Pin) ) {
+					data_to_unit.game_state = GameState::READY_0;
+					start_time = HAL_GetTick() + 3*1000;
+				}
+				break;
+			case GameState::READY_0:
+				if ( start_time <= HAL_GetTick() ) {
+					data_to_unit.game_state = GameState::START_0;
+					end_time = HAL_GetTick() + 10*1000;
+				}
+				break;
+			case GameState::START_0:
+				if ( !(bool)HAL_GPIO_ReadPin(gpio[0].GPIOx, gpio[0].GPIO_Pin) ) {
 					data_to_unit.game_state = GameState::READY;
 					start_time = HAL_GetTick() + 3*1000;
 				}
@@ -198,7 +210,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 				}
 				break;
 		}
-
 
 	}else if(htim == &htim17){
 		// CAN送信
@@ -252,19 +263,33 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan){
 			case CanId::unit0_to_main:
 				memcpy(&data_from_unit,&buf,sizeof(data_from_unit));
 				emg_count[0] = 0;
-				if (data_to_unit.game_state == GameState::START || data_to_unit.game_state == GameState::END_READY || data_to_unit.game_state == GameState::DEBUGING) {
-					HAL_GPIO_WritePin(EMG[0].GPIOx, EMG[0].GPIO_Pin, GPIO_PIN_SET);
-				}else{
-					HAL_GPIO_WritePin(EMG[0].GPIOx, EMG[0].GPIO_Pin, GPIO_PIN_RESET);
+				switch (data_to_unit.game_state) {
+					case GameState::START_0:
+					case GameState::READY:
+					case GameState::START:
+					case GameState::END_READY:
+					case GameState::DEBUGING:
+						HAL_GPIO_WritePin(EMG[0].GPIOx, EMG[0].GPIO_Pin, GPIO_PIN_SET);
+						break;
+					default:
+						HAL_GPIO_WritePin(EMG[0].GPIOx, EMG[0].GPIO_Pin, GPIO_PIN_RESET);
+						break;
 				}
 				break;
 			case CanId::unit1_to_main:
 				memcpy(&data_from_unit[1], &buf, sizeof(data_from_unit[1]));
 				emg_count[1] = 0;
-				if (data_to_unit.game_state == GameState::START || data_to_unit.game_state == GameState::END_READY || data_to_unit.game_state == GameState::DEBUGING) {
-					HAL_GPIO_WritePin(EMG[1].GPIOx, EMG[1].GPIO_Pin, GPIO_PIN_SET);
-				}else{
-					HAL_GPIO_WritePin(EMG[1].GPIOx, EMG[1].GPIO_Pin, GPIO_PIN_RESET);
+				switch (data_to_unit.game_state) {
+					case GameState::START_0:
+					case GameState::READY:
+					case GameState::START:
+					case GameState::END_READY:
+					case GameState::DEBUGING:
+						HAL_GPIO_WritePin(EMG[1].GPIOx, EMG[1].GPIO_Pin, GPIO_PIN_SET);
+						break;
+					default:
+						HAL_GPIO_WritePin(EMG[1].GPIOx, EMG[1].GPIO_Pin, GPIO_PIN_RESET);
+						break;
 				}
 				break;
 

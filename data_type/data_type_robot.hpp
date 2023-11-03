@@ -93,6 +93,8 @@ enum class ShotState : uint8_t{
 
 /** enum **/
 enum class GameState : uint8_t{
+	START_0,	//! スタート5秒前（ローラー未回転）
+	READY_0,	//! スタート(ローラー未回転)
 	READY, 		//! スタート5秒前
 	START,		//! スタート
 	END_READY,	//! 停止5秒前

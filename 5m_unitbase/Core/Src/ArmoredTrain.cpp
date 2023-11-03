@@ -220,7 +220,14 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 	/* 射出 */
 	pid_roller.update_operation(target.roller_rotation - now.roller_rotation);
 //	output_data.compare[0] = pid_roller.get_operation();
-	output_data.compare[0] = 2000;
+	switch (input_data.game_state) {
+		case GameState::READY:
+			output_data.compare[0] = 500;
+			break;
+		case GameState::START:
+			output_data.compare[0] = 2000;
+			break;
+	}
 	/* 送り */
 	switch (shot_state) {
 		case ShotState::SHOTING_0:
@@ -323,11 +330,6 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 
 	/* モータ共通 */
 	for (uint8_t i = 0; i < 4; i++) {
-		// compare STARTの時に0にする
-		if (prev_game_state == GameState::READY && input_data.game_state == GameState::START) {
-			output_data.compare[i] = 0;
-			prev_compare[i] = 0;
-		}
 		// compare 上限調整
 		output_data.compare[i] = suppress_abs<int16_t>(output_data.compare[i], 3900);
 		// compare 最低値調整
@@ -402,22 +404,40 @@ void ArmoredTrain::update(InputData& input_data, OutputData& output_data) {
 		default:
 			cooling_time = 1000;
 			if (prev_game_state == GameState::DEBUGING) {
+				break;
 			}
-			break;
+	}
+	switch (input_data.game_state) {
+		case GameState::READY_0:
+		case GameState::START_0:
 		case GameState::READY:
 			shot_state = ShotState::STOP;
 			output_data.last_bullet = RobotStaticData::max_bullet;
 			output_data.hit_points = 0;
 			break;
 	}
-	if (input_data.game_state == GameState::DEBUGING) {
-		cooling_time = 300;
-		output_data.compare[0] = 800;
-		output_data.last_bullet = RobotStaticData::max_bullet;
-	}else {
-		cooling_time = 1000;
-		if (prev_game_state == GameState::DEBUGING) {
-		}
+	switch (input_data.game_state) {
+		case GameState::READY_0:
+			// 全部0
+			for (uint8_t i = 0; i < 4; i++) {
+				output_data.compare[i] = 0;
+				prev_compare[i] = 0;
+			}
+			break;
+		case GameState::START_0:
+			// 射出、装填のみ0
+			for (uint8_t i = 0; i < 2; i++) {
+				output_data.compare[i] = 0;
+				prev_compare[i] = 0;
+			}
+			break;
+		case GameState::READY:
+			// 装填、移動、旋回のみ0
+			for (uint8_t i = 1; i < 4; i++) {
+				output_data.compare[i] = 0;
+				prev_compare[i] = 0;
+			}
+			break;
 	}
 }
 
