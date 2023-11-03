@@ -36,16 +36,16 @@ constexpr std::array<GPIO_pin,10> LED = {{
 }};
 //GPIO
 constexpr std::array<GPIO_pin,10> gpio = {{
-	{G1_GPIO_Port, G1_Pin}, 	// スタート/ストップ
-	{G2_GPIO_Port, G2_Pin}, 	// デバッグモードか否か
+	{G1_GPIO_Port, G1_Pin}, 	// 0 スタート/ストップ
+	{G2_GPIO_Port, G2_Pin}, 	// 1 デバッグモードか否か
 	{G3_GPIO_Port, G3_Pin},
 	{G4_GPIO_Port, G4_Pin},
 	{G5_GPIO_Port, G5_Pin},
 	{G6_GPIO_Port, G6_Pin},
 	{G7_GPIO_Port, G7_Pin},
-	{G8_GPIO_Port, G8_Pin},
-	{G9_GPIO_Port, G9_Pin},
-	{G10_GPIO_Port, G10_Pin}
+	{G8_GPIO_Port, G8_Pin},		// 7 7セグ電源
+	{G9_GPIO_Port, G9_Pin},     // 8 7セグclock
+	{G10_GPIO_Port, G10_Pin}    // 9 7セグdin
 }};
 std::array<halex::GPIO,10> hal_gpio = {{
 	halex::GPIO(G1_GPIO_Port, G1_Pin), 	// スタート/ストップ
@@ -55,9 +55,9 @@ std::array<halex::GPIO,10> hal_gpio = {{
 	halex::GPIO(G5_GPIO_Port, G5_Pin),
 	halex::GPIO(G6_GPIO_Port, G6_Pin),
 	halex::GPIO(G7_GPIO_Port, G7_Pin),
-	halex::GPIO(G8_GPIO_Port, G8_Pin),
-	halex::GPIO(G9_GPIO_Port, G9_Pin),
-	halex::GPIO(G10_GPIO_Port, G10_Pin)
+	halex::GPIO(G8_GPIO_Port, G8_Pin),	// 7セグ電源
+	halex::GPIO(G9_GPIO_Port, G9_Pin),	// 7セグclock
+	halex::GPIO(G10_GPIO_Port, G10_Pin)	// 7セグdin
 }};
 //非常停止
 constexpr std::array<GPIO_pin,2> EMG = {{
@@ -65,6 +65,10 @@ constexpr std::array<GPIO_pin,2> EMG = {{
 	{GPIOA, GPIO_PIN_4},
 }};
 std::array<uint8_t, 2> emg_count = {0,0};
+// 7セグコントローラ
+GPIO dataPin = {G10_GPIO_Port, G10_Pin};
+GPIO clockPin = {G9_GPIO_Port, G9_Pin};
+TM1640 tm1640(dataPin, clockPin, 4);
 // CAN
 //simpleCanUser can(&hcan);
 CanUser can(&hcan);
@@ -120,6 +124,12 @@ void init(void){
 		HAL_GPIO_WritePin(LED[i].GPIOx, LED[i].GPIO_Pin, GPIO_PIN_SET);
 		HAL_Delay(100);
 	}
+	// 7セグ
+	hal_gpio[7].set();
+	tm1640.init();
+//	tm1640.setDisplayToString("HALOHALOHALOHALO");
+	tm1640.setDisplayToDecNumber(data_from_unit[0].last_bullet*100 + data_from_unit[1].last_bullet, 0);
+	tm1640.setupDisplay(true, 7); // ノイズによる輝度の変更を防ぐため
 }
 
 void loop(void){
@@ -210,6 +220,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 				}
 				break;
 		}
+		// 7セグ
+//		tm1640.setDisplayToDecNumber(data_from_unit[0].last_bullet*100 + data_from_unit[1].last_bullet, 0);
+		tm1640.setDisplayToDecNumber(1234, 0);
+		tm1640.setupDisplay(true, 7); // ノイズによる輝度の変更を防ぐため
 
 	}else if(htim == &htim17){
 		// CAN送信
