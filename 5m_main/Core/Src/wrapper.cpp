@@ -184,6 +184,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 				}
 				break;
 			case GameState::START:
+				if ( (data_from_unit[0].hit_points == 0b111 || data_from_unit[1].hit_points == 0b111)
+						|| (data_from_unit[0].last_bullet == 0 && data_from_unit[0].last_bullet == 0) ){
+					data_to_unit.game_state = GameState::STOP;
+				}
 				if ( end_time - 4*1000 <= HAL_GetTick() ){
 					data_to_unit.game_state = GameState::END_READY;
 				}

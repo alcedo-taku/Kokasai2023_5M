@@ -322,6 +322,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		/* to unit */
 		data_to_unit.sensor_data = input_data.myself;
 		data_to_unit.lock_on = output_data.lock_on;
+		/* to main */
+		data_to_main.hit_points = output_data.hit_points;
+		data_to_main.last_bullet = output_data.last_bullet;
 
 	}else if(htim == &htim17){
 		/* CAN 送信 */
