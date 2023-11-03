@@ -35,7 +35,7 @@ struct InputData {
 struct OutputData {
 	std::array<int16_t, 4> compare; //!<
 	uint8_t lock_on; 				//!< ロックオンできたか
-	uint8_t hit_points; 			//!< 右3bitを使って0,1で格納
+	uint8_t hit_points; 			//!< 右3bitを使って0,1で格納（0がデフォ、1が打たれたとき）
 	uint8_t last_bullet = RobotStaticData::max_bullet;
 };
 

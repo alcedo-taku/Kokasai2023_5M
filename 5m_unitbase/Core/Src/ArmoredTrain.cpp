@@ -406,6 +406,8 @@ void ArmoredTrain::update(InputData& input_data, OutputData& output_data) {
 			break;
 		case GameState::READY:
 			shot_state = ShotState::STOP;
+			output_data.last_bullet = RobotStaticData::max_bullet;
+			output_data.hit_points = 0;
 			break;
 	}
 	if (input_data.game_state == GameState::DEBUGING) {
