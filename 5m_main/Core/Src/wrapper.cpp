@@ -80,11 +80,9 @@ uint16_t rx0_callback_count = 0;
 uint16_t transmit_frequency = 300; //データの更新周波数
 uint8_t number_of_id = 8;
 DataFromMainToUnit data_to_unit;
-DataFromUnitToMain data_from_unit;
-DataFromUnitToMain data_from_unit1;
+std::array<DataFromUnitToMain, 2> data_from_unit;
 DataFromMainToCtrl data_to_ctrl;
-DataFromCtrlToMain data_from_ctrl0;
-DataFromCtrlToMain data_from_ctrl1;
+std::array<DataFromCtrlToMain, 2> data_from_ctrl;
 uint8_t debug_count = 0;
 uint32_t mailbox;
 
@@ -257,7 +255,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan){
 				}
 				break;
 			case CanId::unit1_to_main:
-				memcpy(&data_from_unit1, &buf, sizeof(data_from_unit1));
+				memcpy(&data_from_unit[1], &buf, sizeof(data_from_unit[1]));
 				emg_count[1] = 0;
 				if (data_to_unit.game_state == GameState::START || data_to_unit.game_state == GameState::END_READY || data_to_unit.game_state == GameState::DEBUGING) {
 					HAL_GPIO_WritePin(EMG[1].GPIOx, EMG[1].GPIO_Pin, GPIO_PIN_SET);
@@ -268,10 +266,10 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan){
 
 			// from controller
 			case CanId::ctrl0_to_main:
-				memcpy(&data_from_ctrl0, &buf, sizeof(data_from_ctrl0));
+				memcpy(&data_from_ctrl[0], &buf, sizeof(data_from_ctrl[0]));
 				break;
 			case CanId::ctrl1_to_main:
-				memcpy(&data_from_ctrl1, &buf, sizeof(data_from_ctrl1));
+				memcpy(&data_from_ctrl[0], &buf, sizeof(data_from_ctrl[1]));
 				break;
 		}
 	}
