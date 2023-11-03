@@ -294,8 +294,8 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 //	output_data.compare[3] += pid_angle.get_operation_difference();
 	output_data.compare[3] = pid_angle.get_operation();
 	// ばねがかかっていることによる値の修正
-	if (target_angle - now.angle_of_turret < 0) {
-		output_data.compare[3]*=0.6;
+	if (target_angle - now.angle_of_turret > 0) {
+		output_data.compare[3]*=1.66;
 	}
 #else
 	target.angle_of_turret = suppress_abs<float>(target.angle_of_turret, RobotStaticData::turret_angle_max);
@@ -331,7 +331,7 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 		// compare 上限調整
 		output_data.compare[i] = suppress_abs<int16_t>(output_data.compare[i], 3900);
 		// compare 最低値調整
-		output_data.compare[i] = suppress_stole<int16_t>(output_data.compare[i], 500);
+//		output_data.compare[i] = suppress_stole<int16_t>(output_data.compare[i], 500);
 	}
 	// compare 加速度調整
 	output_data.compare[0] = prev_compare[0] + suppress_abs(output_data.compare[0]-prev_compare[0], 2);

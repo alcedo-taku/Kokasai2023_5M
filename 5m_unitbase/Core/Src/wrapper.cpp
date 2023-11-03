@@ -281,7 +281,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 //		}
 		encoder[0].update();
 		encoder_count[1] = encoder[0].getCount();
-		if (!hal_gpio[2].isSet()) {
+		if (hal_gpio[2].isSet()) {
 //			encoder[0].resetCount();
 			encoder[0].setCount(FieldData::rail_length/RobotStaticData::enc_to_pos_ratio);
 			armored_train.reset_position();

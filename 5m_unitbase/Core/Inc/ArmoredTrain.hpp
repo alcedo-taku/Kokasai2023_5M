@@ -66,7 +66,8 @@ private:
 	aca::PID_Element pid_parameter_position = {5,0,0};
 	aca::PID_controller pid_position = aca::PID_controller (pid_parameter_position, frequency);
 //	aca::PID_Element pid_parameter_angle {7000,200,200};
-	aca::PID_Element pid_parameter_angle {4000,0,0};
+	aca::PID_Element pid_parameter_angle {2400}; // 1台目
+//	aca::PID_Element pid_parameter_angle {12000,0,0}; // 2台目
 	aca::PID_controller pid_angle = aca::PID_controller (pid_parameter_angle, frequency);
 	aca::PID_Element pid_parameter_roller {2,0,0};
 	aca::PID_controller pid_roller = aca::PID_controller (pid_parameter_roller, frequency);
