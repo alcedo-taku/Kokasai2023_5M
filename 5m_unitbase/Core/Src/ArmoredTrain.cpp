@@ -239,7 +239,7 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 			output_data.compare[1] = 2000;
 			break;
 		case ShotState::COOLING_TIME:
-			if (cooling_start + 1000 <= HAL_GetTick()) {
+			if (cooling_start + cooling_time <= HAL_GetTick()) {
 				state = ShotState::STOP;
 			}
 			output_data.compare[1] = 0;
@@ -394,10 +394,12 @@ void ArmoredTrain::update(InputData& input_data, OutputData& output_data) {
 
 	// debug mode ではローラーの回転を止める
 	if (input_data.game_state == GameState::DEBUGING) {
-		output_data.compare[0] = 0;
+		cooling_time = 300;
+		output_data.compare[0] = 800;
+		output_data.last_bullet = RobotStaticData::max_bullet;
 	}else {
+		cooling_time = 1000;
 		if (prev_game_state == GameState::DEBUGING) {
-			output_data.last_bullet = RobotStaticData::max_bullet;
 		}
 	}
 

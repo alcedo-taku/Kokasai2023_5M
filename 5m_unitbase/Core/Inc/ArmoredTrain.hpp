@@ -55,6 +55,7 @@ private:
 	float manual_angle;
 	float prev_manual_angle;
 	float target_angle;
+	uint16_t cooling_time = 1000; // [ms]
 	// とりあえずここに置く変数
 	float pos_e;
 	float ang_e;
