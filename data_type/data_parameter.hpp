@@ -35,18 +35,18 @@ struct RobotStaticData {
 	static constexpr float time_lug1 = 0.5;				//!< 射出までにかかる時間[s]
 	static constexpr float turret_angle_max = 0.5;//40 * M_PI/180; //!< 最大砲塔旋回角度
 	static constexpr float enc_to_pos_ratio = 1.0f / (5120.0f/*PPR*/*4.0f) * 15/*ギヤ数*/ * 6.28f/1000.0f;
-	static constexpr uint8_t max_bullet = 30;
+	static constexpr uint8_t max_bullet = 31;
 };
 // todo パラメータ入力しろ
 //RobotStaticData static_data;
 
-#define ID 2
+#define ID 0
 #if ID == 0
 // 0
-struct RobotUniquData
+struct RobotUniquData {
 	static constexpr aca::PID_Element pid_parameter_position = {5,0,0};
-	static constexpr aca::PID_Element pid_parameter_angle {7000/0.6,200,200};
-	static constexpr float bane_rate = 0.25;
+	static constexpr aca::PID_Element pid_parameter_angle {4000,200,200};
+	static constexpr float bane_rate = 0.20;
 	static constexpr aca::PID_Element pid_parameter_roller {2,0,0};
 };
 #elif ID == 1
@@ -61,7 +61,7 @@ struct RobotUniquData {
 // 2
 struct RobotUniquData {
 	static constexpr aca::PID_Element pid_parameter_position = {5,0,0};
-	static constexpr aca::PID_Element pid_parameter_angle {7500,0,0};
+	static constexpr aca::PID_Element pid_parameter_angle {8000,0,0};
 	static constexpr float bane_rate = 0.15;
 	static constexpr aca::PID_Element pid_parameter_roller {2,0,0};
 };

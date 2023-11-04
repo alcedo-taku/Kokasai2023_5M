@@ -202,14 +202,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 			case GameState::READY:
 				if ( start_time <= HAL_GetTick() ) {
 					data_to_unit.game_state = GameState::START;
-					end_time = HAL_GetTick() + 120*1000;
+					end_time = HAL_GetTick() + 1000*1000;
 				}
 				break;
 			case GameState::START:
-				if ( (data_from_unit[0].hit_points == 0b111 || data_from_unit[1].hit_points == 0b111)
-						|| (data_from_unit[0].last_bullet == 0 && data_from_unit[1].last_bullet == 0) ){
-					data_to_unit.game_state = GameState::STOP;
-				}
+//				if ( (data_from_unit[0].hit_points == 0b111 || data_from_unit[1].hit_points == 0b111)
+//						|| (data_from_unit[0].last_bullet == 0 && data_from_unit[1].last_bullet == 0) ){
+//					data_to_unit.game_state = GameState::STOP;
+//				}
 				if ( end_time - 4*1000 <= HAL_GetTick() ){
 					data_to_unit.game_state = GameState::END_READY;
 				}

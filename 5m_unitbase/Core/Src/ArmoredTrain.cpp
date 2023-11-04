@@ -225,7 +225,7 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 			output_data.compare[0] = 500;
 			break;
 		case GameState::START:
-			output_data.compare[0] = 2000;
+			output_data.compare[0] = 2800;
 			break;
 	}
 	/* 送り */
@@ -263,6 +263,11 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 		input_data.ctrl.right_handle *= 2;
 	}
 	input_data.ctrl.right_handle *= -1;
+#endif
+#if ID == 0
+	if (input_data.ctrl.right_handle < 0) {
+		input_data.ctrl.right_handle *= 2;
+	}
 #endif
 	output_data.compare[2] = suppress_abs<int16_t>(input_data.ctrl.right_handle, 120) * 20;
 	// reset前は最高速度を制限する

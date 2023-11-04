@@ -254,6 +254,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		switch (data_from_unit.game_state) {
 			case GameState::STOP:
 				break;
+			case GameState::READY_0:
 			case GameState::READY:
 				pwm_sounds.set_sounds(music_start, (uint8_t)(sizeof(music_start)/sizeof(Music)));
 				pwm_sounds.start_sounds();
