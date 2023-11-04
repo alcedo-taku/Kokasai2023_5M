@@ -40,7 +40,7 @@ struct RobotStaticData {
 // todo パラメータ入力しろ
 //RobotStaticData static_data;
 
-#define ID 1
+#define ID 0
 #if ID == 0
 // 0
 struct RobotUniquData {

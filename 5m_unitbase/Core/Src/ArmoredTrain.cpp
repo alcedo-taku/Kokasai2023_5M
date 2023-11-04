@@ -260,7 +260,7 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 	/* 横移動 */
 #if ID == 0
 	if (input_data.ctrl.right_handle < 0) {
-		input_data.ctrl.right_handle *= 2;
+		input_data.ctrl.right_handle *= 2.2;
 	}
 	output_data.compare[2] = suppress_abs<int16_t>(input_data.ctrl.right_handle, 120) * 20;
 #elif ID == 1
@@ -343,7 +343,11 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 //	}else{
 //		output_data.compare[3] = manual_operation_value;
 //	}
+#if ID == 0
+	output_data.compare[3] = -suppress_abs<float>(input_data.ctrl.left_handle, 280) * 1.3;
+#elif ID == 1
 	output_data.compare[3] = -suppress_abs<float>(input_data.ctrl.left_handle, 280) * 1.5;
+#endif
 
 #endif
 	// 最大角度の時、出力を正す

@@ -66,7 +66,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim);
 /* Variable Begin */
 uint8_t ctrl_num = 0;
 uint16_t adcBuf[4] = {};
-int16_t adc0Range = 0;
 constexpr std::array<GPIO_pin,4> led_pin = {{
 	{LED_0_GPIO_Port, LED_0_Pin},
 	{LED_1_GPIO_Port, LED_1_Pin},
@@ -161,13 +160,17 @@ uint8_t debug_count = 0;
 #endif
 
 #if ID == 0
-constexpr std::array<int16_t,4> adcCenter = {1820, 2040, 2048,2048};
+constexpr std::array<int16_t,4> adcCenter = {1840, 2000, 2048,2048};
+constexpr int16_t adc0Range = 200;
 #elif ID == 1
 constexpr std::array<int16_t,4> adcCenter = {1900, 2023, 2048,2048};
+constexpr int16_t adc0Range = 200;
 #elif ID == 2
 constexpr std::array<int16_t,4> adcCenter = {1950, 2048, 2048,2048};
+constexpr int16_t adc0Range = 200;
 #elif ID == 3
 constexpr std::array<int16_t,4> adcCenter = {1820, 2040, 2048,2048};
+constexpr int16_t adc0Range = 200;
 #endif
 
 /* Variable End */
@@ -191,7 +194,7 @@ void init(void){
 
 //set parameter that relate adc
 
-	adc0Range = 200;
+
 	HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adcBuf, 4);
 
 	HAL_Delay(1000);
