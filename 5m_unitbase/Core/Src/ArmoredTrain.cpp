@@ -309,12 +309,18 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 	pid_angle.update_operation(target_angle - now.angle_of_turret);
 //	output_data.compare[3] += pid_angle.get_operation_difference();
 	output_data.compare[3] = pid_angle.get_operation();
+#if ID == 0
+	if (target_angle - now.angle_of_turret < 0) {
+		output_data.compare[3]*=0.6;
+	}
+#else
 	// ばねがかかっていることによる値の修正
 	if (target_angle - now.angle_of_turret > 0) {
 		output_data.compare[3]*=1 + (now.angle_of_turret + 0.9)*RobotUniquData::bane_rate;
 	}else {
 		output_data.compare[3]*=1 - (now.angle_of_turret + 0.9)*RobotUniquData::bane_rate;
 	}
+#endif
 #else
 	target.angle_of_turret = suppress_abs<float>(target.angle_of_turret, RobotStaticData::turret_angle_max);
 	pid_angle.update_operation(target.angle_of_turret - now.angle_of_turret);

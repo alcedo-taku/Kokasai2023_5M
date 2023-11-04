@@ -45,7 +45,7 @@ struct RobotStaticData {
 // 0
 struct RobotUniquData {
 	static constexpr aca::PID_Element pid_parameter_position = {5,0,0};
-	static constexpr aca::PID_Element pid_parameter_angle {4000,200,200};
+	static constexpr aca::PID_Element pid_parameter_angle {4500,0,0};
 	static constexpr float bane_rate = 0.20;
 	static constexpr aca::PID_Element pid_parameter_roller {2,0,0};
 };
