@@ -16,6 +16,7 @@
  */
 
 #include <data_type_can.hpp>
+#include <data_parameter.hpp>
 #include "wrapper.hpp"
 
 /* Pre-Processor Begin */
@@ -35,7 +36,7 @@
 #define XBee_AT_MODE 0
 #define XBee_DEBUG_MODE 1
 #define XBee 0
-#define CAN 1
+#define CAN_MODE 1
 
 constexpr uint64_t XBeeTargetAddressLow = 0x0013A200419834AA;
 /* Pre-Processor End */
@@ -65,7 +66,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim);
 /* Variable Begin */
 uint8_t ctrl_num = 0;
 uint16_t adcBuf[4] = {};
-int16_t adcCenter[4] = {};
 int16_t adc0Range = 0;
 constexpr std::array<GPIO_pin,4> led_pin = {{
 	{LED_0_GPIO_Port, LED_0_Pin},
@@ -144,7 +144,8 @@ uint8_t debug = false;
 uint8_t debugBuf[sizeof(data_t)+18];
 #endif
 #endif
-#if CAN
+
+#if CAN_MODE
 CanUser can(&hcan);
 uint32_t mailbox0_complete_count = 0;
 uint32_t mailbox1_complete_count = 0;
@@ -157,6 +158,16 @@ uint16_t rx0_callback_count = 0;
 uint16_t transmit_frequency = 300; //データの更新周波数
 uint8_t number_of_id = 8;
 uint8_t debug_count = 0;
+#endif
+
+#if ID == 0
+constexpr std::array<int16_t,4> adcCenter = {1820, 2040, 2048,2048};
+#elif ID == 1
+constexpr std::array<int16_t,4> adcCenter = {1900, 2023, 2048,2048};
+#elif ID == 2
+constexpr std::array<int16_t,4> adcCenter = {1950, 2048, 2048,2048};
+#elif ID == 3
+constexpr std::array<int16_t,4> adcCenter = {1820, 2040, 2048,2048};
 #endif
 
 /* Variable End */
@@ -179,13 +190,7 @@ void init(void){
 	HAL_Delay(1000);
 
 //set parameter that relate adc
-//	adcCenter[0]  = 1820; // 0カスメンブレン
-//	adcCenter[0]  = 1900; // 1青軸
-	adcCenter[0]  = 1950; // 2
-//	adcCenter[0]  = 2670; // ジョイスティック
-	adcCenter[1]  = 2048;
-	adcCenter[2]  = 2048;
-	adcCenter[3]  = 2048;
+
 	adc0Range = 200;
 	HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adcBuf, 4);
 
@@ -202,7 +207,7 @@ void init(void){
 #endif
 #endif
 
-#if CAN
+#if CAN_MODE
 	// CAN
 	// CANの初期設定
 	can.init();
@@ -247,7 +252,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		readSW(data.sw);
 		readJoystick(data.joystick);
 		data_to_unit.ctrl_data.right_handle = data.joystick[0];
-		data_to_unit.ctrl_data.left_handle = adcBuf[1];
+		data_to_unit.ctrl_data.left_handle = data.joystick[1];
+//		data_to_unit.ctrl_data.left_handle = adcBuf[1];
 		data_to_unit.ctrl_data.is_pulled_trigger = !(bool)HAL_GPIO_ReadPin(gpio_pin[11].GPIOx, gpio_pin[11].GPIO_Pin);
 
 		// 音楽
@@ -302,7 +308,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 #endif //XBee_API_MODE
 #endif
 
-#if CAN
+#if CAN_MODE
 		/* CAN 送信 */
 		static uint8_t can_transmit_count = 0;
 		switch(can_transmit_count){
@@ -366,7 +372,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
 }
 #endif
 
-#if CAN
+#if CAN_MODE
 // CAN受信
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan){
 	std::array<uint8_t,8>buf{};

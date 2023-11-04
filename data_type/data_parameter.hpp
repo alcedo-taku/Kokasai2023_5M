@@ -40,7 +40,7 @@ struct RobotStaticData {
 // todo パラメータ入力しろ
 //RobotStaticData static_data;
 
-#define ID 0
+#define ID 1
 #if ID == 0
 // 0
 struct RobotUniquData {
@@ -48,6 +48,7 @@ struct RobotUniquData {
 	static constexpr aca::PID_Element pid_parameter_angle {4500,0,0};
 	static constexpr float bane_rate = 0.20;
 	static constexpr aca::PID_Element pid_parameter_roller {2,0,0};
+//	static constexpr std::array<int16_t,4> adcCenter = {1820, 2040, 2048,2048};
 };
 #elif ID == 1
 // 1
@@ -56,6 +57,7 @@ struct RobotUniquData {
 	static constexpr aca::PID_Element pid_parameter_angle {7500,0,0};
 	static constexpr float bane_rate = 0.15;
 	static constexpr aca::PID_Element pid_parameter_roller {2,0,0};
+//	static constexpr std::array<int16_t,4> adcCenter = {1900, 2023, 2048,2048};
 };
 #elif ID == 2
 // 2
@@ -64,9 +66,12 @@ struct RobotUniquData {
 	static constexpr aca::PID_Element pid_parameter_angle {8000,0,0};
 	static constexpr float bane_rate = 0.15;
 	static constexpr aca::PID_Element pid_parameter_roller {2,0,0};
+//	static constexpr std::array<int16_t,4> adcCenter = {1950, 2048, 2048,2048};
 };
 #elif ID == 3
 // 3
+//	static constexpr std::array<int16_t,4> adcCenter = {1820, 2040, 2048,2048};
+
 #endif
 
 constexpr uint16_t frequency = 500;
