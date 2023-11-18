@@ -225,7 +225,7 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 			output_data.compare[0] = 500;
 			break;
 		case GameState::START:
-			output_data.compare[0] = 2800;
+			output_data.compare[0] = 3900;
 			break;
 	}
 	/* 送り */
@@ -272,7 +272,18 @@ void ArmoredTrain::calc_output(RobotMovementData& now, RobotMovementData& target
 	input_data.ctrl.right_handle *= -1;
 	output_data.compare[2] = suppress_abs<int16_t>(input_data.ctrl.right_handle, 120) * 20;
 #elif ID == 3
-	output_data.compare[2] = suppress_abs<int16_t>(input_data.ctrl.right_handle, 120.0) * 20;
+	static uint32_t start_time;
+	switch (input_data.game_state) {
+		case GameState::READY:
+			start_time = HAL_GetTick();
+			break;
+		case GameState::START:
+			target.position = (std::cos((float)(HAL_GetTick()-start_time)/6000*(M_PI*2))+1) * (FieldData::rail_length/2+0.03);
+			pid_position.update_operation(target.position - now.position);
+			output_data.compare[2] = pid_position.get_operation();
+		//	output_data.compare[2] = suppress_abs<int16_t>(output_data.compare[2], 2000);
+			break;
+	}
 #endif
 
 
@@ -431,7 +442,7 @@ void ArmoredTrain::update(InputData& input_data, OutputData& output_data) {
 			output_data.last_bullet = RobotStaticData::max_bullet;
 			break;
 		default:
-			cooling_time = 1000;
+			cooling_time = 100;
 			if (prev_game_state == GameState::DEBUGING) {
 				break;
 			}

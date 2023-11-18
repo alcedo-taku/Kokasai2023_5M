@@ -35,7 +35,7 @@ constexpr std::array<GPIO_pin,10> LED = {{
 	{L10_GPIO_Port, L10_Pin} 	// 的 1-2
 }};
 //GPIO
-constexpr std::array<GPIO_pin,10> gpio = {{
+constexpr std::array<GPIO_pin,10> led = {{
 	{G1_GPIO_Port, G1_Pin}, 	// 0 スタート/ストップ
 	{G2_GPIO_Port, G2_Pin}, 	// 1 デバッグモードか否か
 	{G3_GPIO_Port, G3_Pin},
@@ -182,8 +182,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		}
 		switch (data_to_unit.game_state) {
 			case GameState::STOP:
-				if ( !(bool)HAL_GPIO_ReadPin(gpio[0].GPIOx, gpio[0].GPIO_Pin) ) {
-					data_to_unit.game_state = GameState::READY_0;
+				if ( !(bool)HAL_GPIO_ReadPin(led[0].GPIOx, led[0].GPIO_Pin) ) {
+					data_to_unit.game_state = GameState::READY;
 					start_time = HAL_GetTick() + 3*1000;
 				}
 				break;

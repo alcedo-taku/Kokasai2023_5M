@@ -69,9 +69,15 @@ struct RobotUniquData {
 //	static constexpr std::array<int16_t,4> adcCenter = {1950, 2048, 2048,2048};
 };
 #elif ID == 3
-// 3
+// 3 自動妨害モード
+struct RobotUniquData {
+	static constexpr aca::PID_Element pid_parameter_position = {10000,0,0}; // 7000
+	static constexpr aca::PID_Element pid_parameter_angle {8000,0,0};
+	static constexpr float bane_rate = 0.15;
+	static constexpr aca::PID_Element pid_parameter_roller {2,0,0};
+//	static constexpr std::array<int16_t,4> adcCenter = {1950, 2048, 2048,2048};
 //	static constexpr std::array<int16_t,4> adcCenter = {1820, 2040, 2048,2048};
-
+};
 #endif
 
 constexpr uint16_t frequency = 500;
