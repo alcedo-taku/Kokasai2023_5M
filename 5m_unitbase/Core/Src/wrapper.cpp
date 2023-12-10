@@ -95,6 +95,7 @@ std::array<halex::Encoder, 1> encoder = {
 		halex::Encoder(&htim3)	// 位置
 };
 std::array<int32_t, 2> encoder_count = {0,0};
+int32_t encoder_count_debug[2];
 
 // ADC
 mcp3208::MCP3208 mcp3208_reader(hspi2,SPI2_NSS_GPIO_Port,SPI2_NSS_Pin);
@@ -281,6 +282,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 //		}
 		encoder[0].update();
 		encoder_count[1] = encoder[0].getCount();
+		encoder_count_debug[1] = encoder[0].getCount();
 		if (hal_gpio[2].isSet()) {
 //			encoder[0].resetCount();
 			encoder[0].setCount(FieldData::rail_length/RobotStaticData::enc_to_pos_ratio);
