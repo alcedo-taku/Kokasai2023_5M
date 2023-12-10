@@ -19,7 +19,6 @@
 #include "main.h"
 #include "gpio.h"
 #include "HAL_Extension.hpp"
-#include "can_user/can_user.hpp"
 #include "mcp3208.hpp"
 #include <array>
 #include <string.h>
@@ -104,15 +103,15 @@ std::array<uint16_t, 4> adc_value_array;
 
 // CAN
 //simpleCanUser can(&hcan);
-CanUser can(&hcan);
+halex::CAN_Communication can(&hcan);
 /*can関連*/
 uint32_t mailbox0_complete_count = 0;
 uint32_t mailbox1_complete_count = 0;
 uint32_t mailbox2_complete_count = 0;
 uint8_t can_transmit_count = 1;
 uint32_t rx_id; // debug用
-CAN_StatusType can_state;
-HAL_CAN_StateTypeDef can_state_;
+HAL_StatusTypeDef can_status;
+HAL_CAN_StateTypeDef can_state;
 uint16_t rx0_callback_count = 0;
 uint16_t transmit_frequency = 300; //データの更新周波数
 uint8_t number_of_id = 8;
@@ -167,21 +166,21 @@ void init(void){
 	// CANの初期設定
 	can.init();
 	// 受信設定
-	can.setFilterActivationState(ENABLE); // フィルタを有効化
-	can.setFilterMode(CAN_FilterMode::PATH_FOUR_TYPE_STD_ID); // 16bitID リストモード ４種類のIDが追加可能
-	can.setFilterBank(14); // どこまでのバンクを使うか
-	can.setStoreRxFifo(CAN_RX_FIFO0); // 使うFIFOメモリ＿
+	can.setSlaveStartFilterBank(14); // どこまでのバンクを使うか
+	can.setFilterFIFOAssignment(CAN_RX_FIFO0); // 使うFIFOメモリ
 	if (unit_num == 0) {
-		can.setFourTypePathId(CanId::main_to_unit, CanId::unit1_to_unit0_h, CanId::unit1_to_unit0_l, CanId::ctrl0_to_unit0);
+		can.setIdFilter(CanId::main_to_unit, CanId::unit1_to_unit0_h, CanId::unit1_to_unit0_l, CanId::ctrl0_to_unit0);
 	}else if (unit_num == 1){
-		can.setFourTypePathId(CanId::main_to_unit, CanId::unit0_to_unit1_h, CanId::unit0_to_unit1_l, CanId::ctrl1_to_unit1);
+		can.setIdFilter(CanId::main_to_unit, CanId::unit0_to_unit1_h, CanId::unit0_to_unit1_l, CanId::ctrl1_to_unit1);
 	}
-	can.setFilterConfig(); // フィルターの設定を反映する
+	can.applyFilterConfig(); // フィルターの設定を反映する
 	HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING); // 受信割り込みの有効化
 	// 送信設定
-	can.setDataFrame(CAN_RTR_DATA); // メッセージのフレームタイプをデータフレームに設定する
+	can.setRemoteTransmissionRequest(halex::CAN_Communication::RemoteTransmissionRequest::Data); // メッセージのフレームタイプをデータフレームに設定する
 	HAL_CAN_ActivateNotification(&hcan, CAN_IT_TX_MAILBOX_EMPTY);     // 送信割り込みの有効化
 	HAL_CAN_TxMailbox0CompleteCallback(&hcan);
+	// can 開始
+	can.start();
 
 
 
@@ -336,51 +335,51 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 			case 0:
 				// to main
 				if (unit_num == 0) {
-					can.setId(CAN_ID_STD, CanId::unit0_to_main);
+					can.setId(halex::CAN_Communication::IdentifierType::Standard, CanId::unit0_to_main);
 				}else if (unit_num == 1){
-					can.setId(CAN_ID_STD, CanId::unit1_to_main);
+					can.setId(halex::CAN_Communication::IdentifierType::Standard, CanId::unit1_to_main);
 				}
 				data_to_main.debug_count++;
-				can_state = can.transmit(sizeof(data_to_main), (uint8_t*)&data_to_main);
+				can_status = can.transmit(sizeof(data_to_main), (uint8_t*)&data_to_main);
 				can_transmit_count++;
 				break;
 			case 1:
 				// to unit h
 				if (unit_num == 0) {
-					can.setId(CAN_ID_STD, CanId::unit0_to_unit1_h);
+					can.setId(halex::CAN_Communication::IdentifierType::Standard, CanId::unit0_to_unit1_h);
 				}else if (unit_num == 1){
-					can.setId(CAN_ID_STD, CanId::unit1_to_unit0_h);
+					can.setId(halex::CAN_Communication::IdentifierType::Standard, CanId::unit1_to_unit0_h);
 				}
 				data_to_unit.debug_count = experiment_timer/1000;
 
 				memcpy(&buf,&data_to_unit,sizeof(buf));
-				can_state = can.transmit(sizeof(buf), (uint8_t*)&buf);
+				can_status = can.transmit(sizeof(buf), (uint8_t*)&buf);
 				can_transmit_count++;
 				break;
 			case 2:
 				// to unit l
 				if (unit_num == 0) {
-					can.setId(CAN_ID_STD, CanId::unit0_to_unit1_l);
+					can.setId(halex::CAN_Communication::IdentifierType::Standard, CanId::unit0_to_unit1_l);
 				}else if (unit_num == 1){
-					can.setId(CAN_ID_STD, CanId::unit1_to_unit0_l);
+					can.setId(halex::CAN_Communication::IdentifierType::Standard, CanId::unit1_to_unit0_l);
 				}
 
 				memcpy(&buf,&data_to_unit.sensor_data.enc_position,sizeof(buf));
-				can_state = can.transmit(sizeof(buf), (uint8_t*)&buf);
+				can_status = can.transmit(sizeof(buf), (uint8_t*)&buf);
 				can_transmit_count++;
 				break;
 			case 3:
 				// to controller
 				if (unit_num == 0) {
-					can.setId(CAN_ID_STD, CanId::unit0_to_ctrl0);
+					can.setId(halex::CAN_Communication::IdentifierType::Standard, CanId::unit0_to_ctrl0);
 				}else if (unit_num == 1){
-					can.setId(CAN_ID_STD, CanId::unit1_to_ctrl1);
+					can.setId(halex::CAN_Communication::IdentifierType::Standard, CanId::unit1_to_ctrl1);
 				}
-				can_state = can.transmit(sizeof(data_to_ctrl), (uint8_t*)&data_to_ctrl);
+				can_status = can.transmit(sizeof(data_to_ctrl), (uint8_t*)&data_to_ctrl);
 				can_transmit_count = 0; // ラストは0にする
 				break;
 		}
-		can_state_ = can.getState();
+		can_state = can.getState();
 	}
 }
 
@@ -401,9 +400,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 // CAN受信
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan){
 	std::array<uint8_t,8>buf{};
-	can_state = can.receive(CAN_RX_FIFO0,(uint8_t*)&buf);
+	can_status = can.receive(CAN_RX_FIFO0, (uint8_t*)&buf);
 	rx_id = can.getRxId();
-	if(can_state == CAN_StatusType::HAL_OK){
+	if(can_status == HAL_StatusTypeDef::HAL_OK){
 //		__HAL_TIM_SET_COUNTER(&htim13, 0);
 //		disconnect_count = 0;
 		switch (can.getRxId()) {
